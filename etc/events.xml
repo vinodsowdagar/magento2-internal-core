@@ -1,0 +1,53 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="payment_method_assign_data_multisafepay_ideal">
+        <observer name="ideal_assign_chosen_issuer" instance="MultiSafepay\ConnectCore\Observer\Gateway\IdealDataAssignObserver" />
+    </event>
+    <event name="payment_method_assign_data_multisafepay_payafter">
+        <observer name="payafter_assign_payment_data" instance="MultiSafepay\ConnectCore\Observer\Gateway\PayafterDataAssignObserver" />
+    </event>
+    <event name="payment_method_assign_data_multisafepay_afterpay">
+        <observer name="afterpay_assign_payment_data" instance="MultiSafepay\ConnectCore\Observer\Gateway\AfterpayDataAssignObserver" />
+    </event>
+    <event name="payment_method_assign_data_multisafepay_directbanktransfer">
+        <observer name="directbanktransfer_assign_payment_data" instance="MultiSafepay\ConnectCore\Observer\Gateway\DirectBankTransferDataAssignObserver" />
+    </event>
+    <event name="payment_method_assign_data_multisafepay_directdebit">
+        <observer name="directdebit_assign_payment_data" instance="MultiSafepay\ConnectCore\Observer\Gateway\DirectDebitDataAssignObserver" />
+    </event>
+    <event name="payment_method_assign_data_multisafepay_einvoicing">
+        <observer name="einvoicing_assign_payment_data" instance="MultiSafepay\ConnectCore\Observer\Gateway\EinvoicingDataAssignObserver" />
+    </event>
+    <event name="payment_method_assign_data_multisafepay_in3">
+        <observer name="in3_assign_payment_data" instance="MultiSafepay\ConnectCore\Observer\Gateway\In3DataAssignObserver" />
+    </event>
+    <event name="payment_method_assign_data_multisafepay_visa">
+        <observer name="visa_assign_credit_card_data" instance="MultiSafepay\ConnectCore\Observer\Gateway\CreditCardDataAssignObserver" />
+    </event>
+    <event name="payment_method_assign_data_multisafepay_mastercard">
+        <observer name="mastercard_assign_credit_card_data" instance="MultiSafepay\ConnectCore\Observer\Gateway\CreditCardDataAssignObserver" />
+    </event>
+    <event name="payment_method_assign_data_multisafepay_maestro">
+        <observer name="maestro_assign_credit_card_data" instance="MultiSafepay\ConnectCore\Observer\Gateway\CreditCardDataAssignObserver" />
+    </event>
+    <event name="payment_method_assign_data_multisafepay_creditcard">
+        <observer name="multisafepay_creditcard_assign_credit_card_data" instance="MultiSafepay\ConnectCore\Observer\Gateway\CreditCardDataAssignObserver" />
+    </event>
+    <event name="payment_method_assign_data_multisafepay_amex">
+        <observer name="multisafepay_amex_assign_credit_card_data" instance="MultiSafepay\ConnectCore\Observer\Gateway\CreditCardDataAssignObserver" />
+    </event>
+
+    <event name="email_order_set_template_vars_before">
+        <observer name="payment_link_email_var" instance="MultiSafepay\ConnectCore\Observer\SetTemplateVarsBefore" />
+    </event>
+
+    <event name="email_order_comment_set_template_vars_before">
+        <observer name="payment_link_email_comment_var" instance="MultiSafepay\ConnectCore\Observer\SetTemplateVarsBefore" />
+    </event>
+
+    <event name="sales_order_shipment_save_after">
+        <observer name="multisafepay_shipment_save_after" instance="MultiSafepay\ConnectCore\Observer\ShipmentSaveAfterObserver" />
+    </event>
+    <event name="sales_order_invoice_save_after">
+        <observer name="inventory_sales_virtual_source_deduction_processor" instance="MultiSafepay\ConnectCore\Observer\InvoiceSaveAfterObserver"/>
+    </event>
+</config>
