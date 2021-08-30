@@ -56,6 +56,7 @@ jobs:
             module_name: MultiSafepay_ConnectCore
             composer_name: multisafepay/magento2-core
             ce_version: '2.3.6'
+            phpunit_file: './phpunit.xml'
             magento_pre_install_script: .github/workflows/magento-integration-tests-pre-phpunit.sh
       - name: M2 Integration Tests on 2.4.2
         uses: Vinod-MultiSafepay/github-actions-m2/magento-integration-tests/7.4@master
@@ -67,5 +68,6 @@ jobs:
             module_name: MultiSafepay_ConnectCore
             composer_name: multisafepay/magento2-core
             ce_version: '2.4.2'
+            phpunit_file: './phpunit.xml'
             magento_pre_install_script: .github/workflows/magento-integration-tests-pre-install.sh
             magento_post_install_script: .github/workflows/magento-integration-tests-post-install.sh
