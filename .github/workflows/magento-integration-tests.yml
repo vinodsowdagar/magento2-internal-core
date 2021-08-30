@@ -2,12 +2,7 @@ name: Integration Tests
 on:
   push:
     branches:
-      - master
-  pull_request:
-    types: [opened]
-    branches:
-      - 'master'
-      - 'release/**'
+      - main
 
 jobs:
   integration-tests:
