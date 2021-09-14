@@ -60,7 +60,7 @@ jobs:
             phpunit_file: './phpunit.xml'
             magento_pre_install_script: .github/workflows/magento-integration-tests-pre-phpunit.sh
       - name: Show directory structure
-        working-directory: /tmp/m2
+        working-directory: /tmp
         run: find . -type d | sed -e "s/[^-][^\/]*\//  |/g" -e "s/|\([^ ]\)/| - \1/"
       - name: Send clover to codecov
         run: bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }} -R .
