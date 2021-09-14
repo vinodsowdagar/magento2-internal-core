@@ -59,7 +59,5 @@ jobs:
             ce_version: '2.3.6'
             phpunit_file: './phpunit.xml'
             magento_pre_install_script: .github/workflows/magento-integration-tests-pre-phpunit.sh
-      - name: Find coverage.xml
-        run: find . -name coverage.xml -printf '%h\n'
       - name: Send clover to codecov
         run: bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }} -R .
