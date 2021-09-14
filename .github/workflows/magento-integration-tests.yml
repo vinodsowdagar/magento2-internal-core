@@ -52,7 +52,6 @@ jobs:
             MAGENTO_MARKETPLACE_USERNAME: ${{ secrets.MAGENTO_MARKETPLACE_USERNAME }}
             MAGENTO_MARKETPLACE_PASSWORD: ${{ secrets.MAGENTO_MARKETPLACE_PASSWORD }}
             GLOBAL_GITHUB_TOKEN: ${{ secrets.GLOBAL_GITHUB_TOKEN }}
-            CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
             module_name: MultiSafepay_ConnectCore
             composer_name: multisafepay/magento2-core
