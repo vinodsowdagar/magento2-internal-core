@@ -47,12 +47,12 @@ jobs:
             path: ${{ steps.composer-cache.outputs.dir }}
             key: ${{ runner.os }}-composer
       - name: M2 Integration Tests on 2.4.2
-          uses: MultiSafepay/github-actions-m2/magento-integration-tests/7.4@master
-          env:
+        uses: multisafepaydev/github-actions-m2/magento-integration-tests/7.4@master
+        env:
             MAGENTO_MARKETPLACE_USERNAME: ${{ secrets.MAGENTO_MARKETPLACE_USERNAME }}
             MAGENTO_MARKETPLACE_PASSWORD: ${{ secrets.MAGENTO_MARKETPLACE_PASSWORD }}
             GLOBAL_GITHUB_TOKEN: ${{ secrets.GLOBAL_GITHUB_TOKEN }}
-          with:
+        with:
             module_name: MultiSafepay_ConnectCore
             composer_name: multisafepay/magento2-core
             ce_version: '2.4.2'
