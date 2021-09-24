@@ -46,17 +46,18 @@ jobs:
         with:
             path: ${{ steps.composer-cache.outputs.dir }}
             key: ${{ runner.os }}-composer
-      - name: M2 Integration Tests on 2.3.6
-        uses: multisafepaydev/github-actions-m2/magento-integration-tests/7.3@master
-        env:
+      - name: M2 Integration Tests on 2.4.2
+          uses: MultiSafepay/github-actions-m2/magento-integration-tests/7.4@master
+          env:
             MAGENTO_MARKETPLACE_USERNAME: ${{ secrets.MAGENTO_MARKETPLACE_USERNAME }}
             MAGENTO_MARKETPLACE_PASSWORD: ${{ secrets.MAGENTO_MARKETPLACE_PASSWORD }}
             GLOBAL_GITHUB_TOKEN: ${{ secrets.GLOBAL_GITHUB_TOKEN }}
-        with:
+          with:
             module_name: MultiSafepay_ConnectCore
             composer_name: multisafepay/magento2-core
-            ce_version: '2.3.6'
+            ce_version: '2.4.2'
             phpunit_file: './phpunit.xml'
-            magento_pre_install_script: .github/workflows/magento-integration-tests-pre-phpunit.sh
+            magento_pre_install_script: .github/workflows/magento-integration-tests-pre-install.sh
+            magento_post_install_script: .github/workflows/magento-integration-tests-post-install.sh
       - name: Send clover to codecov
         run: bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }} -R .
