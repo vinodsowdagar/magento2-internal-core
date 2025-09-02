@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,18 +7,19 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
 
 namespace MultiSafepay\ConnectCore\Gateway\Request\Builder;
 
+use Exception;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Payment\Gateway\Helper\SubjectReader;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 use Magento\Sales\Api\Data\OrderInterface;
+use Magento\Sales\Model\Order\Payment;
 use Magento\Store\Model\Store;
 use MultiSafepay\Api\Transactions\CaptureRequest;
 use MultiSafepay\Api\Transactions\Transaction;
@@ -83,21 +83,24 @@ class CancelTransactionBuilder implements BuilderInterface
     /**
      * @param array $buildSubject
      * @return array
+     * @throws LocalizedException
+     * @throws Exception
      */
     public function build(array $buildSubject): array
     {
+        /** @var Payment $payment */
+        $payment = SubjectReader::readPayment($buildSubject)->getPayment();
+
         /** @var OrderInterface $order */
-        $order = SubjectReader::readPayment($buildSubject)->getPayment()->getOrder();
+        $order = $payment->getOrder();
+
         $orderIncrementId = $order->getIncrementId();
         $storeId = (int)$order->getStoreId();
-        $result = [
-            'order_id' => $orderIncrementId,
-            Store::STORE_ID => $storeId,
-        ];
+        $result = ['order_id' => $orderIncrementId, Store::STORE_ID => $storeId];
 
         try {
             if ($this->paymentMethodUtil->isMultisafepayOrder($order)
-                && $this->captureUtil->isCaptureManualPayment($order->getPayment())
+                && $this->captureUtil->isManualCaptureEnabled($order->getPayment())
             ) {
                 $transaction = $this->sdkFactory->create($storeId)
                     ->getTransactionManager()

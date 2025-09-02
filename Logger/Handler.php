@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,9 +7,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
@@ -29,11 +26,6 @@ class Handler extends Base
      * @var string
      */
     protected $fileName = '/var/log/multisafepay.log';
-
-    /**
-     * @var int
-     */
-    protected $level = Logger::INFO;
 
     /**
      * @var Config
@@ -60,15 +52,19 @@ class Handler extends Base
     }
 
     /**
-     * @param array $record
+     * @param $record
      * @return bool
      */
-    public function isHandling(array $record)
+    public function isHandling($record): bool
     {
         if ($this->config->isDebug()) {
             return true;
         }
 
-        return $record['level'] >= Logger::WARNING;
+        if ($record instanceof \Monolog\LogRecord) {
+            return $record->toArray()['level'] >= \Monolog\Level::Warning;
+        }
+
+        return $record['level'] >= \Monolog\Logger::WARNING;
     }
 }

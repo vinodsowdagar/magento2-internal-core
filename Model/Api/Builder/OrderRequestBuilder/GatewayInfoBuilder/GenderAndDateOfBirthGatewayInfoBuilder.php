@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,9 +7,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
@@ -21,10 +18,6 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\Data\OrderPaymentInterface;
 use MultiSafepay\Api\Transactions\OrderRequest\Arguments\GatewayInfo\Meta;
-use MultiSafepay\ValueObject\Customer\EmailAddress;
-use MultiSafepay\ValueObject\Customer\PhoneNumber;
-use MultiSafepay\ValueObject\Date;
-use MultiSafepay\ValueObject\Gender;
 
 class GenderAndDateOfBirthGatewayInfoBuilder implements GatewayInfoBuilderInterface
 {
@@ -45,6 +38,8 @@ class GenderAndDateOfBirthGatewayInfoBuilder implements GatewayInfoBuilderInterf
     }
 
     /**
+     * Build the gateway info
+     *
      * @param OrderInterface $order
      * @param OrderPaymentInterface $payment
      * @return Meta
@@ -66,9 +61,9 @@ class GenderAndDateOfBirthGatewayInfoBuilder implements GatewayInfoBuilderInterf
             throw new LocalizedException(__('This payment gateway requires a valid telephone number'));
         }
 
-        return $this->meta->addGender(new Gender($additionalInformation['gender']))
-            ->addBirthday(new Date($additionalInformation['date_of_birth']))
-            ->addEmailAddress(new EmailAddress($order->getCustomerEmail()))
-            ->addPhone(new PhoneNumber($additionalInformation['phone_number']));
+        return $this->meta->addGenderAsString($additionalInformation['gender'])
+            ->addBirthdayAsString($additionalInformation['date_of_birth'])
+            ->addEmailAddressAsString($order->getCustomerEmail())
+            ->addPhoneAsString($additionalInformation['phone_number']);
     }
 }

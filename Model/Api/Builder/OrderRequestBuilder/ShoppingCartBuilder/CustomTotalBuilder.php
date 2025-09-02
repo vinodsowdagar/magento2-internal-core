@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,9 +7,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
@@ -39,6 +36,7 @@ class CustomTotalBuilder implements ShoppingCartBuilderInterface
         'fooman_surcharge_tax_after',
         'mp_reward_spent',
         'mp_reward_earn',
+        'marketplace_shipping',
     ];
 
     /**
@@ -134,6 +132,13 @@ class CustomTotalBuilder implements ShoppingCartBuilderInterface
     private function buildItem($total, string $currency, int $storeId): Item
     {
         $title = $this->getTitle($total);
+
+        if (class_exists(\Magento\GiftCardAccount\Model\Giftcardaccount::class)) {
+            if ($total->getCode() === 'giftcardaccount' && ($giftCards = $total->getGiftCards())) {
+                $title = $this->getGiftCardAccountTitle($total, $giftCards);
+            }
+        }
+
         $unitPrice = $total->getAmount() ? $this->getAmount($total, $storeId) : $total->getValue();
 
         return (new Item())
@@ -143,6 +148,22 @@ class CustomTotalBuilder implements ShoppingCartBuilderInterface
             ->addDescription($title)
             ->addMerchantItemId($total->getCode())
             ->addTaxRate($this->getTaxRate($total, $storeId));
+    }
+
+    /**
+     * @param $total
+     * @param array $giftCardsData
+     * @return string
+     */
+    private function getGiftCardAccountTitle($total, array $giftCardsData): string
+    {
+        $couponCodes = '';
+
+        foreach ($giftCardsData as $data) {
+            $couponCodes .= $data[\Magento\GiftCardAccount\Model\Giftcardaccount::CODE] . ',';
+        }
+
+        return $this->getTitle($total) . ' (' . rtrim($couponCodes, ',') . ')';
     }
 
     /**
@@ -157,10 +178,13 @@ class CustomTotalBuilder implements ShoppingCartBuilderInterface
         }
 
         if ($this->config->useBaseCurrency($storeId)) {
-            return $total->getBaseTaxRate() ?? round($total->getBaseTaxAmount() / $total->getBaseAmount() * 100);
+            return $total->getBaseTaxRate() ??
+                   ($total->getBaseAmount()
+                       ? round($total->getBaseTaxAmount() / $total->getBaseAmount() * 100) : 0);
         }
 
-        return $total->getBaseTaxRate() ?? round($total->getTaxAmount() / $total->getAmount() * 100);
+        return $total->getBaseTaxRate() ??
+               ($total->getAmount() ? round($total->getTaxAmount() / $total->getAmount() * 100) : 0);
     }
 
     /**
@@ -183,7 +207,7 @@ class CustomTotalBuilder implements ShoppingCartBuilderInterface
      */
     private function getTitle($total): string
     {
-        $title = $total->getTitle() ?: $total->getLabel();
+        $title = $total->getTitle() ? : $total->getLabel();
 
         if ($title instanceof Phrase) {
             return (string)$title->render();

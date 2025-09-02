@@ -1,0 +1,13 @@
+parameters:
+    level: 2
+    errorFormat: github
+    paths:
+        - .
+    excludePaths:
+        - etc
+        - Test
+        - view
+        - Model/Api/Builder/OrderRequestBuilder/ShoppingCartBuilder/CustomTotalBuilder.php
+        - Util/ThirdPartyPluginsUtil.php
+        - Factory/SdkFactory.php
+        - Logger/Handler.php

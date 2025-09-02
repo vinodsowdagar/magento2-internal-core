@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,15 +7,14 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
 
 namespace MultiSafepay\ConnectCore\Gateway\Response;
 
+use Exception;
 use Magento\Payment\Gateway\Response\HandlerInterface;
 use MultiSafepay\ConnectCore\Logger\Logger;
 
@@ -41,15 +39,16 @@ class CancelResponseHandler implements HandlerInterface
      * @param array $handlingSubject
      * @param array|null $response
      *
+     * @throws Exception
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function handle(array $handlingSubject, ?array $response): void
     {
-        if ($response && isset($response['success'])) {
-            $this->logger->logInfoForOrder(
-                $response['order_id'] ?: '',
-                'Reservation for MultiSafepay order was canceled.'
-            );
-        }
+        $orderId = $response['order_id'] ?? 'unknown';
+
+        $this->logger->logInfoForOrder(
+            (string)$orderId,
+            'Order canceled by CancelResponseHandler'
+        );
     }
 }

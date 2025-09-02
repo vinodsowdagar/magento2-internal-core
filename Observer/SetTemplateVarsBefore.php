@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,9 +7,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
@@ -22,7 +19,8 @@ use Magento\Framework\App\State;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Sales\Model\Order;
+use Magento\Sales\Api\Data\OrderInterface;
+use MultiSafepay\ConnectCore\Service\PaymentLink;
 
 class SetTemplateVarsBefore implements ObserverInterface
 {
@@ -32,17 +30,27 @@ class SetTemplateVarsBefore implements ObserverInterface
     private $state;
 
     /**
+     * @var PaymentLink
+     */
+    private $paymentLink;
+
+    /**
      * SetTemplateVarsBefore constructor.
      *
      * @param State $state
+     * @param PaymentLink $paymentLink
      */
     public function __construct(
-        State $state
+        State $state,
+        PaymentLink $paymentLink
     ) {
         $this->state = $state;
+        $this->paymentLink = $paymentLink;
     }
 
     /**
+     * Retrieve the payment link from the order and add it to the Transport object
+     *
      * @param Observer $observer
      * @throws LocalizedException
      */
@@ -53,14 +61,14 @@ class SetTemplateVarsBefore implements ObserverInterface
         }
 
         $transport = $this->getTransportObject($observer);
+        $order = $this->getOrderFromTransportObject($transport);
 
-        /** @var Order $order */
-        $order = $transport->getOrder();
-        $payment = $order->getPayment();
+        if ($order === null) {
+            return;
+        }
 
-        if (array_key_exists('payment_link', $payment->getAdditionalInformation())) {
-            $paymentLink = $payment->getAdditionalInformation()['payment_link'];
-            $transport['payment_link'] = $paymentLink;
+        if ($paymentUrl = $this->paymentLink->getPaymentLinkFromOrder($order)) {
+            $transport['payment_link'] = $paymentUrl;
         }
     }
 
@@ -75,6 +83,27 @@ class SetTemplateVarsBefore implements ObserverInterface
         if (array_key_exists('transportObject', $observer->getData())) {
             return $observer->getData()['transportObject'];
         }
+
         return $observer->getTransport();
+    }
+
+    /**
+     * Retrieve the order from the Transport object
+     *
+     * phpcs:ignore
+     * @param $transport
+     * @return OrderInterface|null
+     */
+    private function getOrderFromTransportObject($transport): ?OrderInterface
+    {
+        if (is_array($transport) && array_key_exists('order', $transport)) {
+            return $transport['order'];
+        }
+
+        if (is_object($transport) && $transport->getOrder() instanceof OrderInterface) {
+            return $transport->getOrder();
+        }
+
+        return null;
     }
 }

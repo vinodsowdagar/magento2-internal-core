@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,28 +7,24 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
 
 namespace MultiSafepay\ConnectCore\Model\Ui;
 
-use Magento\Checkout\Model\ConfigProviderInterface;
-
 class ConfigProviderPool
 {
     /**
-     * @var ConfigProviderInterface[]
+     * @var GenericConfigProvider[]
      */
     private $configProviders;
 
     /**
      * Pool constructor.
      *
-     * @param ConfigProviderInterface[] $configProviders
+     * @param GenericConfigProvider[] $configProviders
      */
     public function __construct(array $configProviders)
     {
@@ -38,15 +33,15 @@ class ConfigProviderPool
 
     /**
      * @param string $code
-     * @return ConfigProviderInterface|null
+     * @return GenericConfigProvider|null
      */
-    public function getConfigProviderByCode(string $code): ?ConfigProviderInterface
+    public function getConfigProviderByCode(string $code): ?GenericConfigProvider
     {
         return $this->configProviders[$code] ?? null;
     }
 
     /**
-     * @return ConfigProviderInterface[]
+     * @return GenericConfigProvider[]
      */
     public function getConfigProviders(): array
     {

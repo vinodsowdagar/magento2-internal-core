@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,27 +7,23 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
 
 namespace MultiSafepay\ConnectCore\Model\Api\Builder\OrderRequestBuilder;
 
-use Magento\Sales\Api\Data\OrderInterface;
-use Magento\Sales\Api\Data\OrderPaymentInterface;
+use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Address;
+use Magento\Sales\Model\Order\Payment;
 use MultiSafepay\Api\Transactions\OrderRequest;
 use MultiSafepay\Api\Transactions\OrderRequest\Arguments\CustomerDetails;
 use MultiSafepay\ConnectCore\Model\Api\Builder\OrderRequestBuilder\CustomerBuilder\AddressBuilder;
-use MultiSafepay\ValueObject\Customer\EmailAddress;
-use MultiSafepay\ValueObject\Customer\PhoneNumber;
+use MultiSafepay\Exception\InvalidArgumentException;
 
 class DeliveryBuilder implements OrderRequestBuilderInterface
 {
-
     /**
      * @var AddressBuilder
      */
@@ -46,12 +41,15 @@ class DeliveryBuilder implements OrderRequestBuilderInterface
     }
 
     /**
-     * @param OrderInterface $order
-     * @param OrderPaymentInterface $payment
+     * @param Order $order
+     * @param Payment $payment
      * @param OrderRequest $orderRequest
+     * @throws InvalidArgumentException
      * @return void
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    public function build(OrderInterface $order, OrderPaymentInterface $payment, OrderRequest $orderRequest): void
+    public function build(Order $order, Payment $payment, OrderRequest $orderRequest): void
     {
         /** @var Address $shippingAddress */
         $shippingAddress = $order->getShippingAddress();
@@ -62,8 +60,8 @@ class DeliveryBuilder implements OrderRequestBuilderInterface
             $deliveryDetails->addFirstName($shippingAddress->getFirstname())
                     ->addLastName($shippingAddress->getLastname())
                     ->addAddress($address)
-                    ->addPhoneNumber(new PhoneNumber($shippingAddress->getTelephone() ?? ''))
-                    ->addEmailAddress(new EmailAddress($shippingAddress->getEmail()));
+                    ->addPhoneNumberAsString($shippingAddress->getTelephone() ?? '')
+                    ->addEmailAddressAsString($shippingAddress->getEmail());
 
             $orderRequest->addDelivery($deliveryDetails);
         }

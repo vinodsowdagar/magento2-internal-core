@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,9 +7,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
@@ -22,8 +19,9 @@ use MultiSafepay\ConnectCore\Observer\Gateway\AfterpayDataAssignObserver;
 use MultiSafepay\ConnectCore\Observer\Gateway\DirectBankTransferDataAssignObserver;
 use MultiSafepay\ConnectCore\Observer\Gateway\DirectDebitDataAssignObserver;
 use MultiSafepay\ConnectCore\Observer\Gateway\EinvoicingDataAssignObserver;
-use MultiSafepay\ConnectCore\Observer\Gateway\IdealDataAssignObserver;
+use MultiSafepay\ConnectCore\Observer\Gateway\IssuersDataAssignObserver;
 use MultiSafepay\ConnectCore\Observer\Gateway\PayafterDataAssignObserver;
+use MultiSafepay\ConnectCore\Observer\Gateway\PaymentComponentDataAssignObserver;
 
 class EventsTest extends EventsTestCase
 {
@@ -32,11 +30,6 @@ class EventsTest extends EventsTestCase
      */
     public function testForAdminObservers()
     {
-        $this->findObserverForEvent(
-            IdealDataAssignObserver::class,
-            'payment_method_assign_data_multisafepay_ideal'
-        );
-
         $this->findObserverForEvent(
             PayafterDataAssignObserver::class,
             'payment_method_assign_data_multisafepay_payafter'
@@ -60,6 +53,21 @@ class EventsTest extends EventsTestCase
         $this->findObserverForEvent(
             EinvoicingDataAssignObserver::class,
             'payment_method_assign_data_multisafepay_einvoicing'
+        );
+
+        $this->findObserverForEvent(
+            PaymentComponentDataAssignObserver::class,
+            'payment_method_assign_data_multisafepay_bnplinstm'
+        );
+
+        $this->findObserverForEvent(
+            PaymentComponentDataAssignObserver::class,
+            'payment_method_assign_data_multisafepay_zinia'
+        );
+
+        $this->findObserverForEvent(
+            PaymentComponentDataAssignObserver::class,
+            'payment_method_assign_data_multisafepay_in3b2b'
         );
     }
 }

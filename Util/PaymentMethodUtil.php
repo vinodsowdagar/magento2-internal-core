@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,39 +7,53 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
 
 namespace MultiSafepay\ConnectCore\Util;
 
-use Magento\Quote\Api\Data\CartInterface;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Quote\Model\Quote;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Payment\Model\MethodInterface;
+use Magento\Sales\Model\Order;
+use Magento\Sales\Model\Order\Payment;
 
 class PaymentMethodUtil
 {
     public const MULTISAFEPAY_METHOD_ID = 'is_multisafepay';
 
     /**
-     * @param CartInterface $cart
+     * @param Quote $cart
      * @return bool
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
-    public function isMultisafepayCart(CartInterface $cart): bool
+    public function isMultisafepayCart(Quote $cart): bool
     {
         return $this->checkIsMultisafepayMethodByPayment($cart->getPayment()->getMethodInstance());
     }
 
     /**
-     * @param OrderInterface $order
+     * Check if it is a MultiSafepay order
+     *
+     * @param Order $order
      * @return bool
+     * @throws LocalizedException
      */
-    public function isMultisafepayOrder(OrderInterface $order): bool
+    public function isMultisafepayOrder(Order $order): bool
     {
-        return $this->checkIsMultisafepayMethodByPayment($order->getPayment()->getMethodInstance());
+        if ($order->getPayment() === null) {
+            return false;
+        }
+
+        /** @var Payment $payment */
+        $payment = $order->getPayment();
+
+        return $this->checkIsMultisafepayMethodByPayment($payment->getMethodInstance());
     }
 
     /**

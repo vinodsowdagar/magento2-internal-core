@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,15 +7,14 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
 
 namespace MultiSafepay\ConnectCore\Service\Shipment;
 
+use Exception;
 use Magento\Framework\Message\ManagerInterface;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\Data\ShipmentInterface;
@@ -80,7 +78,7 @@ class AddShippingToTransaction
     /**
      * @param ShipmentInterface $shipment
      * @param OrderInterface $order
-     * @throws ClientExceptionInterface
+     * @throws Exception
      */
     public function execute(
         ShipmentInterface $shipment,
@@ -102,8 +100,13 @@ class AddShippingToTransaction
                 It can be manually updated in MultiSafepay Control'));
 
             return;
+        } catch (ClientExceptionInterface $clientException) {
+            $this->logger->logClientException($orderId, $clientException);
+
+            return;
         }
 
+        $this->logger->logInfoForOrder($orderId, 'The shipping status has been updated at MultiSafepay');
         $this->messageManager->addSuccessMessage(__('The order status has succesfully been updated at MultiSafepay'));
     }
 }

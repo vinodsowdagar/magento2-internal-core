@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,9 +7,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
@@ -18,6 +15,7 @@ declare(strict_types=1);
 namespace MultiSafepay\ConnectCore\Util;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\Data\OrderItemInterface;
 use Magento\Store\Model\ScopeInterface;
@@ -38,25 +36,25 @@ class PriceUtil
     private $scopeConfig;
 
     /**
-     * @var JsonHandler
+     * @var TaxUtil
      */
-    private $jsonHandler;
+    private $taxUtil;
 
     /**
      * PriceUtil constructor.
      *
      * @param Config $config
      * @param ScopeConfigInterface $scopeConfig
-     * @param JsonHandler $jsonHandler
+     * @param TaxUtil $taxUtil
      */
     public function __construct(
         Config $config,
         ScopeConfigInterface $scopeConfig,
-        JsonHandler $jsonHandler
+        TaxUtil $taxUtil
     ) {
         $this->config = $config;
         $this->scopeConfig = $scopeConfig;
-        $this->jsonHandler = $jsonHandler;
+        $this->taxUtil = $taxUtil;
     }
 
     /**
@@ -87,12 +85,8 @@ class PriceUtil
             $storeId
         );
 
-        $weeeTaxData = $this->jsonHandler->readJSON($item->getWeeeTaxApplied());
-        $weeeTaxUnitPrice = $this->getWeeeTaxUnitPrice($weeeTaxData, $storeId) ? : 0.0;
-
-        return $isPriceIncludedTax ? $this->getUnitPriceInclTax($item, $storeId, $orderedQuantity) +
-                                     $weeeTaxUnitPrice
-            : $this->getUnitPriceExclTax($item, $storeId, $orderedQuantity) + $weeeTaxUnitPrice;
+        return $isPriceIncludedTax ? $this->getUnitPriceInclTax($item, $storeId, $orderedQuantity)
+            : $this->getUnitPriceExclTax($item, $storeId, $orderedQuantity);
     }
 
     /**
@@ -148,21 +142,27 @@ class PriceUtil
     /**
      * @param OrderInterface $order
      * @return float
+     * @throws NoSuchEntityException
      */
     public function getShippingUnitPrice(OrderInterface $order): float
     {
-        $isShippingPriceIncludedTax = $this->scopeConfig->getValue(
-            MagentoConfig::CONFIG_XML_PATH_SHIPPING_INCLUDES_TAX,
-            ScopeInterface::SCOPE_STORE,
-            $order->getStoreId()
-        );
+        $shippingTaxRate = 1 + ($this->taxUtil->getShippingTaxRate($order) / 100);
 
         if ($this->config->useBaseCurrency($order->getStoreId())) {
-            return (float)($isShippingPriceIncludedTax ?
-                $order->getBaseShippingInclTax() : $order->getBaseShippingAmount());
+            if ($order->getBaseShippingInclTax() === $order->getBaseShippingAmount()) {
+                return $order->getBaseShippingAmount() - $order->getBaseShippingDiscountAmount();
+            }
+
+            return ($order->getBaseShippingInclTax() - ($order->getBaseShippingDiscountAmount() * $shippingTaxRate))
+                   / $shippingTaxRate;
         }
 
-        return (float)($isShippingPriceIncludedTax ? $order->getShippingInclTax() : $order->getShippingAmount());
+        if ($order->getShippingInclTax() === $order->getShippingAmount()) {
+            return $order->getShippingAmount() - $order->getShippingDiscountAmount();
+        }
+
+        return ($order->getShippingInclTax() - ($order->getShippingDiscountAmount() * $shippingTaxRate))
+               / $shippingTaxRate;
     }
 
     /**

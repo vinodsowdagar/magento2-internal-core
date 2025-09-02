@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,9 +7,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
@@ -22,6 +19,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Model\Order;
 use MultiSafepay\Api\Transactions\OrderRequest;
+use MultiSafepay\Api\Transactions\OrderRequest\Arguments\CheckoutOptions;
 use MultiSafepay\ConnectCore\Model\Api\Builder\OrderRequestBuilder;
 use MultiSafepay\ConnectCore\Model\Api\Builder\OrderRequestBuilder\ShoppingCartBuilder;
 use MultiSafepay\ConnectCore\Model\Ui\Gateway\AfterpayConfigProvider;
@@ -58,7 +56,6 @@ class ShoppingCartBuilderTest extends AbstractTestCase
     {
         $orderRequest = $this->prepareOrderRequest();
         $orderRequest->addGatewayCode(AfterpayConfigProvider::CODE);
-
         self::assertArrayNotHasKey('shopping_cart', $orderRequest->getData());
     }
 
@@ -102,7 +99,7 @@ class ShoppingCartBuilderTest extends AbstractTestCase
             $merchantItemIds[] = $item['merchant_item_id'];
         }
 
-        self::assertSame(['simple', 'simple-2'], $merchantItemIds);
+        self::assertSame(['simple_', 'simple-2_'], $merchantItemIds);
     }
 
     /**

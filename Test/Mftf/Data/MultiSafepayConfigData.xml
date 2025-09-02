@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -9,9 +8,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 -->
 
@@ -39,5 +36,149 @@
         <data key="scope_id">0</data>
         <data key="label">No</data>
         <data key="value">0</data>
+    </entity>
+    <entity name="IdealEnableConfigData">
+        <data key="path">payment/multisafepay_ideal/active</data>
+        <data key="scope_id">0</data>
+        <data key="label">Yes</data>
+        <data key="value">1</data>
+    </entity>
+    <entity name="IdealDisableConfigData">
+        <data key="path">payment/multisafepay_ideal/active</data>
+        <data key="scope_id">0</data>
+        <data key="label">No</data>
+        <data key="value">0</data>
+    </entity>
+    <entity name="CreditCardEnableConfigData">
+        <data key="path">payment/multisafepay_creditcard/active</data>
+        <data key="scope_id">0</data>
+        <data key="label">Yes</data>
+        <data key="value">1</data>
+    </entity>
+    <entity name="CreditCardDisableConfigData">
+        <data key="path">payment/multisafepay_creditcard/active</data>
+        <data key="scope_id">0</data>
+        <data key="label">No</data>
+        <data key="value">0</data>
+    </entity>
+    <entity name="CreditCardComponentEnableConfigData">
+        <data key="path">payment/multisafepay_creditcard/payment_type</data>
+        <data key="scope_id">0</data>
+        <data key="label">Yes</data>
+        <data key="value">payment_component</data>
+    </entity>
+    <entity name="CreditCardComponentDisableConfigData">
+        <data key="path">payment/multisafepay_creditcard/payment_type</data>
+        <data key="scope_id">0</data>
+        <data key="label">No</data>
+        <data key="value">redirect</data>
+    </entity>
+    <entity name="AfterPayEnableConfigData">
+        <data key="path">payment/multisafepay_afterpay/active</data>
+        <data key="scope_id">0</data>
+        <data key="label">Yes</data>
+        <data key="value">1</data>
+    </entity>
+    <entity name="AfterPayDisableConfigData">
+        <data key="path">payment/multisafepay_afterpay/active</data>
+        <data key="scope_id">0</data>
+        <data key="label">No</data>
+        <data key="value">0</data>
+    </entity>
+    <entity name="EInvoicingEnableConfigData">
+        <data key="path">payment/multisafepay_einvoicing/active</data>
+        <data key="scope_id">0</data>
+        <data key="label">Yes</data>
+        <data key="value">1</data>
+    </entity>
+    <entity name="EInvoicingDisableConfigData">
+        <data key="path">payment/multisafepay_einvoicing/active</data>
+        <data key="scope_id">0</data>
+        <data key="label">No</data>
+        <data key="value">0</data>
+    </entity>
+    <entity name="BankTransferEnableConfigData">
+        <data key="path">payment/multisafepay_banktransfer/active</data>
+        <data key="scope_id">0</data>
+        <data key="label">Yes</data>
+        <data key="value">1</data>
+    </entity>
+    <entity name="BankTransferDisableConfigData">
+        <data key="path">payment/multisafepay_banktransfer/active</data>
+        <data key="scope_id">0</data>
+        <data key="label">No</data>
+        <data key="value">0</data>
+    </entity>
+    <entity name="BankTransferDirectConfigData">
+        <data key="path">payment/multisafepay_banktransfer/transaction_type</data>
+        <data key="scope_id">0</data>
+        <data key="label">Yes</data>
+        <data key="value">direct</data>
+    </entity>
+    <entity name="BankTransferRedirectConfigData">
+        <data key="path">payment/multisafepay_banktransfer/transaction_type</data>
+        <data key="scope_id">0</data>
+        <data key="label">No</data>
+        <data key="value">redirect</data>
+    </entity>
+    <entity name="BancontactEnableConfigData">
+        <data key="path">payment/multisafepay_bancontact/active</data>
+        <data key="scope_id">0</data>
+        <data key="label">Yes</data>
+        <data key="value">1</data>
+    </entity>
+    <entity name="BancontactDisableConfigData">
+        <data key="path">payment/multisafepay_bancontact/active</data>
+        <data key="scope_id">0</data>
+        <data key="label">No</data>
+        <data key="value">0</data>
+    </entity>
+    <entity name="PayAfterDeliveryInstallmentsEnableConfigData">
+        <data key="path">payment/multisafepay_bnplinstm/active</data>
+        <data key="scope_id">0</data>
+        <data key="label">Yes</data>
+        <data key="value">1</data>
+    </entity>
+    <entity name="PayAfterDeliveryInstallmentsDisableConfigData">
+        <data key="path">payment/multisafepay_bnplinstm/active</data>
+        <data key="scope_id">0</data>
+        <data key="label">No</data>
+        <data key="value">0</data>
+    </entity>
+    <entity name="PayAfterDeliveryInstallmentsComponentEnableConfigData">
+        <data key="path">payment/multisafepay_bnplinstm/payment_type</data>
+        <data key="scope_id">0</data>
+        <data key="label">Yes</data>
+        <data key="value">payment_component</data>
+    </entity>
+    <entity name="PayAfterDeliveryInstallmentsComponentDisableConfigData">
+        <data key="path">payment/multisafepay_bnplinstm/payment_type</data>
+        <data key="scope_id">0</data>
+        <data key="label">No</data>
+        <data key="value">redirect</data>
+    </entity>
+    <entity name="ZiniaEnableConfigData">
+        <data key="path">payment/multisafepay_zinia/active</data>
+        <data key="scope_id">0</data>
+        <data key="label">Yes</data>
+        <data key="value">1</data>
+    </entity>
+    <entity name="ZiniaDisableConfigData">
+        <data key="path">payment/multisafepay_zinia/active</data>
+        <data key="scope_id">0</data>
+        <data key="label">No</data>
+        <data key="value">0</data>
+    </entity>
+    <entity name="ZiniaComponentEnableConfigData">
+        <data key="path">payment/multisafepay_zinia/payment_type</data>
+        <data key="scope_id">0</data>
+        <data key="label">Yes</data>
+        <data key="value">payment_component</data>
+    </entity>
+    <entity name="ZiniaComponentDisableConfigData">
+        <data key="path">payment/multisafepay_zinia/payment_type</data>
+        <data key="scope_id">0</data>
+        <data key="label">No</data>
+        <data key="value">redirect</data>
     </entity>
 </entities>

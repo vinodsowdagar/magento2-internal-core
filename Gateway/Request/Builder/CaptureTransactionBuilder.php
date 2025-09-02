@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,22 +7,22 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
 
 namespace MultiSafepay\ConnectCore\Gateway\Request\Builder;
 
+use Exception;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Payment\Gateway\Helper\SubjectReader;
 use Magento\Payment\Gateway\Request\BuilderInterface;
-use Magento\Payment\Model\InfoInterface;
-use Magento\Sales\Api\Data\OrderInterface;
-use Magento\Sales\Exception\CouldNotInvoiceException;
+use Magento\Sales\Model\Order;
+use Magento\Sales\Model\Order\Invoice;
+use Magento\Sales\Model\Order\Payment;
 use Magento\SalesSequence\Model\Manager;
+use Magento\Sales\Exception\CouldNotInvoiceException;
 use Magento\Store\Model\Store;
 use MultiSafepay\Api\Transactions\CaptureRequest;
 use MultiSafepay\Api\Transactions\Transaction;
@@ -31,7 +30,9 @@ use MultiSafepay\ConnectCore\Factory\SdkFactory;
 use MultiSafepay\ConnectCore\Logger\Logger;
 use MultiSafepay\ConnectCore\Util\AmountUtil;
 use MultiSafepay\ConnectCore\Util\CaptureUtil;
+use MultiSafepay\ConnectCore\Util\JsonHandler;
 use MultiSafepay\ConnectCore\Util\ShipmentUtil;
+use MultiSafepay\Exception\ApiException;
 use Psr\Http\Client\ClientExceptionInterface;
 
 /**
@@ -75,6 +76,11 @@ class CaptureTransactionBuilder implements BuilderInterface
     private $logger;
 
     /**
+     * @var JsonHandler
+     */
+    private $jsonHandler;
+
+    /**
      * CaptureTransactionBuilder constructor.
      *
      * @param AmountUtil $amountUtil
@@ -84,6 +90,7 @@ class CaptureTransactionBuilder implements BuilderInterface
      * @param ShipmentUtil $shipmentUtil
      * @param Manager $sequenceManager
      * @param Logger $logger
+     * @param JsonHandler $jsonHandler
      */
     public function __construct(
         AmountUtil $amountUtil,
@@ -92,7 +99,8 @@ class CaptureTransactionBuilder implements BuilderInterface
         CaptureRequest $captureRequest,
         ShipmentUtil $shipmentUtil,
         Manager $sequenceManager,
-        Logger $logger
+        Logger $logger,
+        JsonHandler $jsonHandler
     ) {
         $this->amountUtil = $amountUtil;
         $this->captureUtil = $captureUtil;
@@ -101,6 +109,7 @@ class CaptureTransactionBuilder implements BuilderInterface
         $this->shipmentUtil = $shipmentUtil;
         $this->sequenceManager = $sequenceManager;
         $this->logger = $logger;
+        $this->jsonHandler = $jsonHandler;
     }
 
     /**
@@ -108,22 +117,27 @@ class CaptureTransactionBuilder implements BuilderInterface
      * @return array
      * @throws CouldNotInvoiceException
      * @throws LocalizedException
+     * @throws Exception
      */
     public function build(array $buildSubject): array
     {
         $paymentDataObject = SubjectReader::readPayment($buildSubject);
         $amount = (float)SubjectReader::readAmount($buildSubject);
 
-        if ($amount <= 0) {
-            throw new CouldNotInvoiceException(
-                __('Invoices with 0 or negative amount can not be processed. Please set a different amount')
-            );
-        }
-
+        /** @var Payment $payment */
         $payment = $paymentDataObject->getPayment();
-        /** @var OrderInterface $order */
+
         $order = $payment->getOrder();
         $orderIncrementId = $order->getIncrementId();
+
+        if ($amount <= 0) {
+            $exceptionMessage =
+                __('Invoices with 0 or negative amount can not be processed. Please set a different amount');
+            $this->logger->logInfoForOrder($orderIncrementId, $exceptionMessage->render());
+
+            throw new CouldNotInvoiceException($exceptionMessage);
+        }
+
         $storeId = (int)$order->getStoreId();
         $this->validateManualCapture($amount, $orderIncrementId, $storeId);
 
@@ -141,16 +155,17 @@ class CaptureTransactionBuilder implements BuilderInterface
      * @param string $orderIncrementId
      * @param int $storeId
      * @throws CouldNotInvoiceException
+     * @throws Exception
      */
     private function validateManualCapture(float $invoiceAmount, string $orderIncrementId, int $storeId): void
     {
         try {
             $transactionManager = $this->sdkFactory->create($storeId)->getTransactionManager();
             $transaction = $transactionManager->get($orderIncrementId)->getData();
-        } catch (ClientExceptionInterface $clientException) {
-            $this->logger->logExceptionForOrder($orderIncrementId, $clientException);
+        } catch (ClientExceptionInterface | ApiException $exception) {
+            $this->logger->logExceptionForOrder($orderIncrementId, $exception);
 
-            throw new CouldNotInvoiceException(__($clientException->getMessage()));
+            throw new CouldNotInvoiceException(__($exception->getMessage()));
         }
 
         $exceptionMessage = __('Manual MultiSafepay online capture can\'t be processed for non manual capture orders');
@@ -169,7 +184,7 @@ class CaptureTransactionBuilder implements BuilderInterface
         }
 
         if (!$this->captureUtil->isManualCapturePossibleForAmount($transaction, $invoiceAmount)) {
-            $exceptionMessage = __('Manual payment capture amount is can\'t be processed,  please try again.');
+            $exceptionMessage = __('Manual payment capture amount can\'t be processed,  please try again.');
             $this->logger->logInfoForOrder($orderIncrementId, $exceptionMessage->render());
 
             throw new CouldNotInvoiceException($exceptionMessage);
@@ -178,16 +193,27 @@ class CaptureTransactionBuilder implements BuilderInterface
 
     /**
      * @param float $amount
-     * @param OrderInterface $order
-     * @param InfoInterface $payment
+     * @param Order $order
+     * @param Payment $payment
      * @return array
+     * @throws CouldNotInvoiceException
      * @throws LocalizedException
+     * @throws Exception
      */
-    private function prepareCaptureRequestData(float $amount, OrderInterface $order, InfoInterface $payment): array
+    private function prepareCaptureRequestData(float $amount, Order $order, Payment $payment): array
     {
+        /** @var Invoice $invoice */
         $invoice = $payment->getInvoice() ?: $order->getInvoiceCollection()->getLastItem();
+        $orderIncrementId = $order->getIncrementId();
 
-        if ($invoice && !$invoice->getIncrementId()) {
+        if (!$invoice->getData()) {
+            $exceptionMessage = __('Something went wrong. Invoice was not found.');
+            $this->logger->logInfoForOrder($orderIncrementId, $exceptionMessage->render());
+
+            throw new CouldNotInvoiceException($exceptionMessage);
+        }
+
+        if (!$invoice->getIncrementId()) {
             $invoice->setIncrementId(
                 $this->sequenceManager->getSequence(
                     $invoice->getEntityType(),
@@ -197,18 +223,29 @@ class CaptureTransactionBuilder implements BuilderInterface
         }
 
         $shipment = $payment->getShipment();
-        $invoiceIncrementId = $invoice ? $invoice->getIncrementId() : "";
+        $invoiceIncrementId = $invoice->getIncrementId();
         $result = [
             "amount" => round($this->amountUtil->getAmount($amount, $order) * 100, 10),
             "invoice_id" => $invoiceIncrementId,
             "new_order_status" => $shipment ? Transaction::SHIPPED : Transaction::COMPLETED,
         ];
 
-        if ($invoiceIncrementId) {
-            $result['new_order_id'] = $order->getIncrementId() . '_' . $invoiceIncrementId;
+        if ($invoiceIncrementId
+            && ((float)$invoice->getBaseGrandTotal() !== (float)$order->getBaseGrandTotal())
+        ) {
+            $result['new_order_id'] = $orderIncrementId . '_' . $invoiceIncrementId;
         }
 
-        return $shipment ? array_merge($result, $this->shipmentUtil->getShipmentApiRequestData($order, $shipment))
-            : $result;
+        $captureRequestData = $shipment
+            ? array_merge($result, $this->shipmentUtil->getShipmentApiRequestData($order, $shipment)) : $result;
+
+        $this->logger->logInfoForOrder(
+            $orderIncrementId,
+            __('Prepared capture request data: %1', $this->jsonHandler->convertToPrettyJSON($captureRequestData))
+                ->render(),
+            Logger::DEBUG
+        );
+
+        return $captureRequestData;
     }
 }

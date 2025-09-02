@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,9 +7,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
@@ -19,6 +16,8 @@ namespace MultiSafepay\ConnectCore\Util;
 
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\Data\ShipmentInterface;
+use Magento\Sales\Model\Order;
+use Zend_Db_Select_Exception;
 
 class ShipmentUtil
 {
@@ -31,9 +30,10 @@ class ShipmentUtil
     {
         return [
             "tracktrace_code" => $this->getTrackingNumber($shipment),
-            "carrier" => $order->getShippingDescription(),
-            "ship_date" => $shipment->getCreatedAt(),
+            "carrier" => $order->getShippingDescription() ?? '',
+            "ship_date" => $shipment->getCreatedAt() ?? '',
             "reason" => 'Shipped',
+            "status" => 'shipped'
         ];
     }
 
@@ -51,10 +51,11 @@ class ShipmentUtil
     }
 
     /**
-     * @param OrderInterface $order
+     * @param Order $order
      * @return bool
+     * @throws Zend_Db_Select_Exception
      */
-    public function isOrderShippedPartially(OrderInterface $order): bool
+    public function isOrderShippedPartially(Order $order): bool
     {
         return !($this->isOrderShipped($order)
                  && $order->getShipmentsCollection()
@@ -62,10 +63,10 @@ class ShipmentUtil
     }
 
     /**
-     * @param OrderInterface $order
+     * @param Order $order
      * @return bool
      */
-    public function isOrderShipped(OrderInterface $order): bool
+    public function isOrderShipped(Order $order): bool
     {
         foreach ($order->getAllItems() as $item) {
             if ($item->getQtyToShip() > 0 && !$item->getIsVirtual() && !$item->getLockedDoShip()) {

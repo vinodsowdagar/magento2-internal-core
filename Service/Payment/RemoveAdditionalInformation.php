@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,19 +7,19 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
 
 namespace MultiSafepay\ConnectCore\Service\Payment;
 
+use Exception;
 use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\OrderPaymentRepositoryInterface;
+use Magento\Sales\Model\Order;
 use MultiSafepay\ConnectCore\Logger\Logger;
 
 class RemoveAdditionalInformation
@@ -56,11 +55,24 @@ class RemoveAdditionalInformation
     }
 
     /**
-     * @param OrderInterface $order
+     * Remove sensitive additional information when needed
+     *
+     * @param Order $order
+     * @throws Exception
      */
-    public function execute(OrderInterface $order): void
+    public function execute(Order $order): void
     {
         if ($order->getPayment()) {
+            $additionalInformation = $order->getPayment()->getAdditionalInformation();
+
+            if (!$additionalInformation) {
+                return;
+            }
+
+            if (!$this->needToRemoveAdditionalInformation($additionalInformation)) {
+                return;
+            }
+
             try {
                 $orderPayment = $this->orderPaymentRepository->get($order->getPayment()->getEntityId());
                 $orderPayment->setAdditionalInformation(
@@ -79,5 +91,22 @@ class RemoveAdditionalInformation
                 $this->logger->logInfoForOrder($order->getRealOrderId(), $noSuchEntityException->getMessage());
             }
         }
+    }
+
+    /**
+     * Check if additional information needs to be removed
+     *
+     * @param array $additionalInformation
+     * @return bool
+     */
+    private function needToRemoveAdditionalInformation(array $additionalInformation): bool
+    {
+        foreach (self::ADDITIONAL_INFO_KEYS as $key) {
+            if (array_key_exists($key, $additionalInformation)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

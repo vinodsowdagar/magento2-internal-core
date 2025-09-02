@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,9 +7,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
@@ -38,7 +35,7 @@ class PaymentLinkTest extends AbstractPaymentTestCase
     protected function setUp(): void
     {
         $this->paymentLinkService = $this->getObjectManager()->create(PaymentLink::class);
-        $this->getObjectManager()->get(State::class)->setAreaCode(Area::AREA_FRONTEND);
+        $this->getObjectManager()->get(State::class)->setAreaCode(Area::AREA_ADMINHTML);
     }
 
     /**
@@ -69,9 +66,12 @@ class PaymentLinkTest extends AbstractPaymentTestCase
         $payment = $order->getPayment();
         $this->paymentLinkService->addPaymentLink($order, $fakePaymentLink);
 
-        self::assertEquals($fakePaymentLink, $payment->getAdditionalInformation('payment_link'));
         self::assertEquals(
-            __('The user has been redirected to the following page: %1', $fakePaymentLink)->render(),
+            $fakePaymentLink,
+            $payment->getAdditionalInformation(PaymentLink::MULTISAFEPAY_PAYMENT_LINK_PARAM_NAME)
+        );
+        self::assertEquals(
+            __('Payment link for this transaction: %1', $fakePaymentLink)->render(),
             $order->getStatusHistoryCollection()->getFirstItem()->getComment()
         );
     }

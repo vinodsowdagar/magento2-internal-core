@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,9 +7,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
@@ -18,14 +15,16 @@ declare(strict_types=1);
 namespace MultiSafepay\ConnectCore\Model\Api\Builder\OrderRequestBuilder;
 
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Sales\Api\Data\OrderInterface;
-use Magento\Sales\Api\Data\OrderPaymentInterface;
+use Magento\Sales\Model\Order;
+use Magento\Sales\Model\Order\Payment;
 use MultiSafepay\Api\Transactions\OrderRequest;
 use MultiSafepay\ConnectCore\Model\Api\Builder\OrderRequestBuilder\GatewayInfoBuilder\GatewayInfoBuilderInterface;
-use MultiSafepay\ConnectCore\Model\Ui\Gateway\IdealConfigProvider;
+use MultiSafepay\ConnectCore\Model\Ui\Gateway\MyBankConfigProvider;
 
 class GatewayInfoBuilder implements OrderRequestBuilderInterface
 {
+    public const GATEWAY_WITH_ISSUER_LIST = [MyBankConfigProvider::CODE];
+
     /**
      * @var GatewayInfoBuilderInterface[]
      */
@@ -43,12 +42,12 @@ class GatewayInfoBuilder implements OrderRequestBuilderInterface
     }
 
     /**
-     * @param OrderInterface $order
-     * @param OrderPaymentInterface $payment
+     * @param Order $order
+     * @param Payment $payment
      * @param OrderRequest $orderRequest
      * @throws LocalizedException
      */
-    public function build(OrderInterface $order, OrderPaymentInterface $payment, OrderRequest $orderRequest): void
+    public function build(Order $order, Payment $payment, OrderRequest $orderRequest): void
     {
         $paymentCode = $payment->getMethod();
 
@@ -56,14 +55,18 @@ class GatewayInfoBuilder implements OrderRequestBuilderInterface
             return;
         }
 
-        // If transaction type is set to 'redirect' then do not add gateway info
-        if ($payment->getMethodInstance()->getConfigData('transaction_type') === 'redirect') {
+        if (in_array($paymentCode, self::GATEWAY_WITH_ISSUER_LIST, true)
+            && !isset($payment->getAdditionalInformation()['issuer_id'])
+        ) {
             return;
         }
 
-        if ($paymentCode === IdealConfigProvider::CODE
-            && !isset($payment->getAdditionalInformation()['issuer_id'])
-        ) {
+        $transactionType = $payment->getMethodInstance()->getConfigData('transaction_type') ?:
+            $payment->getAdditionalInformation()['transaction_type'] ??
+            TransactionTypeBuilder::TRANSACTION_TYPE_REDIRECT_VALUE;
+
+        // If transaction type is not set to 'direct' then do not add gateway info
+        if ($transactionType !== TransactionTypeBuilder::TRANSACTION_TYPE_DIRECT_VALUE) {
             return;
         }
 

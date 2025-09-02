@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,26 +7,21 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
 
 namespace MultiSafepay\ConnectCore\Gateway\Http\Client;
 
+use Exception;
 use Magento\Payment\Gateway\Config\Config;
-use Magento\Payment\Gateway\Http\ClientException;
 use Magento\Payment\Gateway\Http\ClientInterface;
-use Magento\Payment\Gateway\Http\ConverterException;
 use Magento\Payment\Gateway\Http\TransferInterface;
 use MultiSafepay\ConnectCore\Model\Ui\Gateway\GenericGatewayConfigProvider;
-use Psr\Http\Client\ClientExceptionInterface;
 
 class GenericGatewayRefundClient implements ClientInterface
 {
-
     /**
      * @var RefundClient
      */
@@ -55,21 +49,24 @@ class GenericGatewayRefundClient implements ClientInterface
         RefundClient $refundClient,
         ShoppingCartRefundClient $shoppingCartRefundClient
     ) {
+        $this->config = $config;
         $this->refundClient = $refundClient;
         $this->shoppingCartRefundClient = $shoppingCartRefundClient;
-        $this->config = $config;
     }
 
     /**
+     * Place the refund request
+     *
      * @param TransferInterface $transferObject
      * @return array|null
-     * @throws ClientException
-     * @throws ConverterException
-     * @throws ClientExceptionInterface
+     * @throws Exception
      */
     public function placeRequest(TransferInterface $transferObject): ?array
     {
-        $this->config->setMethodCode(GenericGatewayConfigProvider::CODE);
+        $request = $transferObject->getBody();
+        $methodCode = $request['method_code'];
+
+        $this->config->setMethodCode($methodCode);
 
         if ($this->config->getValue(GenericGatewayConfigProvider::REQUIRE_SHOPPING_CART)) {
             return $this->shoppingCartRefundClient->placeRequest($transferObject);

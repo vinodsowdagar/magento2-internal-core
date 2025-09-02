@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,9 +7,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
@@ -76,32 +73,38 @@ class OrderPlaceAfterObserver implements ObserverInterface
 
         /** @var Payment $payment */
         $payment = $order->getPayment();
+
+        // Fast Checkout orders should not be processed by this observer
+        if ($payment->getAdditionalInformation('multisafepay_fastcheckout')) {
+            return;
+        }
+
         $isMultiSafepay = $payment->getMethodInstance()->getConfigData('is_multisafepay');
 
         if ($isMultiSafepay) {
             try {
                 $paymentUrl = $this->paymentLink->getPaymentLinkByOrder($order);
                 $this->paymentLink->addPaymentLink($order, $paymentUrl);
+                $this->logger->logInfoForOrder($orderId, 'Payment URL is: ' . $paymentUrl);
             } catch (InvalidApiKeyException $invalidApiKeyException) {
                 $this->logger->logInvalidApiKeyException($invalidApiKeyException);
-                $this->messageManager->addErrorMessage(__('The order can not be created, because the
-                MultiSafepay API key is invalid'));
+                //phpcs:ignore
+                $this->messageManager->addErrorMessage(__('The transaction can not be created, because the MultiSafepay API key is invalid'));
                 return;
             } catch (ApiException $apiException) {
                 $this->logger->logPaymentLinkError($orderId, $apiException);
-                $this->messageManager->addErrorMessage(__('The order can not be created,
-                because there was a MultiSafepay error: ') .
-                    $apiException->getCode() . ' ' . $apiException->getMessage());
+                //phpcs:ignore
+                $this->messageManager->addErrorMessage(__('The transaction can not be created, because there was a MultiSafepay error: ') . $apiException->getCode() . ' ' . $apiException->getMessage());
                 return;
             } catch (ClientExceptionInterface $clientException) {
                 $this->logger->logClientException($orderId, $clientException);
-                $this->messageManager->addErrorMessage(__('Something went wrong when connecting to MultiSafepay.
-                 Please check the logs for more details.'));
+                //phpcs:ignore
+                $this->messageManager->addErrorMessage(__('Something went wrong when connecting to MultiSafepay. Please check the logs for more details.'));
                 return;
             } catch (Exception $exception) {
                 $this->logger->logOrderRequestBuilderException($order->getIncrementId(), $exception);
-                $this->messageManager->addErrorMessage(__('Something went wrong when creating the transaction at
-                MultiSafepay. Please check the logs for more details.'));
+                //phpcs:ignore
+                $this->messageManager->addErrorMessage(__('Something went wrong when creating the transaction at MultiSafepay. Please check the logs for more details.'));
                 return;
             }
         }

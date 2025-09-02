@@ -13,14 +13,31 @@
                 <refund_custom_description />
                 <use_base_currency>1</use_base_currency>
                 <preselected_method>multisafepay_ideal</preselected_method>
+                <icon_type>default</icon_type>
                 <debug>0</debug>
+                <account_data/>
             </general>
+            <status>
+                <initialized_status/>
+                <uncleared_status/>
+                <reserved_status/>
+                <chargeback_status/>
+                <refunded_status/>
+                <partial_refunded_status/>
+                <void_status/>
+                <declined_status/>
+                <expired_status/>
+                <cancelled_status/>
+            </status>
             <advanced>
                 <custom_totals />
+                <disable_utm_nooverride>0</disable_utm_nooverride>
+                <second_chance_paymentlink>2</second_chance_paymentlink>
                 <disable_shopping_cart>0</disable_shopping_cart>
                 <use_custom_return_url>0</use_custom_return_url>
                 <custom_cancel_return_url/>
                 <custom_success_return_url/>
+                <add_coupon_to_item_names>0</add_coupon_to_item_names>
             </advanced>
         </multisafepay>
         <payment>
@@ -32,6 +49,8 @@
                 <title>MultiSafepay</title>
                 <currency>EUR</currency>
                 <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>1</can_use_internal>
                 <can_refund>1</can_refund>
@@ -55,6 +74,8 @@
                 <title>iDEAL</title>
                 <currency>EUR</currency>
                 <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>1</can_use_internal>
                 <can_refund>1</can_refund>
@@ -67,9 +88,49 @@
                 <allow_specific_customer_group>0</allow_specific_customer_group>
                 <allow_amount>0</allow_amount>
                 <custom_payment_link_lifetime>0</custom_payment_link_lifetime>
+                <show_payment_page>0</show_payment_page>
+                <transaction_type>direct</transaction_type>
                 <is_multisafepay>1</is_multisafepay>
                 <gateway_code>IDEAL</gateway_code>
             </multisafepay_ideal>
+            <multisafepay_ideal_recurring>
+                <active>0</active>
+                <model>MultiSafepayIdealRecurringFacade</model>
+                <order_status>pending</order_status>
+                <payment_action>authorize</payment_action>
+                <title>iDEAL (Recurring)</title>
+                <currency>EUR</currency>
+                <can_authorize>1</can_authorize>
+                <can_authorize_vault>1</can_authorize_vault>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
+                <can_use_checkout>1</can_use_checkout>
+                <can_use_internal>0</can_use_internal>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <is_gateway>1</is_gateway>
+                <sort_order>1</sort_order>
+                <can_capture>0</can_capture>
+                <can_capture_partial>0</can_capture_partial>
+                <allowspecific>0</allowspecific>
+                <allow_specific_currency>0</allow_specific_currency>
+                <allow_specific_shipping_method>0</allow_specific_shipping_method>
+                <allow_specific_customer_group>0</allow_specific_customer_group>
+                <allow_amount>0</allow_amount>
+                <custom_payment_link_lifetime>0</custom_payment_link_lifetime>
+                <transaction_type>redirect</transaction_type>
+                <is_multisafepay>1</is_multisafepay>
+                <gateway_code>IDEAL</gateway_code>
+            </multisafepay_ideal_recurring>
+            <multisafepay_ideal_vault>
+                <active>0</active>
+                <model>MultiSafepayIdealVaultFacade</model>
+                <title>Stored Bank Account (iDEAL)</title>
+                <transaction_type>direct</transaction_type>
+                <instant_purchase>
+                    <supported>1</supported>
+                </instant_purchase>
+            </multisafepay_ideal_vault>
             <multisafepay_payafter>
                 <active>0</active>
                 <model>PayafterFacade</model>
@@ -78,8 +139,12 @@
                 <title>Pay After Delivery</title>
                 <currency>EUR</currency>
                 <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>0</can_use_internal>
+                <override_order_confirmation_email>0</override_order_confirmation_email>
+                <order_confirmation_email/>
                 <can_refund>1</can_refund>
                 <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
                 <is_gateway>1</is_gateway>
@@ -94,6 +159,60 @@
                 <is_multisafepay>1</is_multisafepay>
                 <gateway_code>PAYAFTER</gateway_code>
             </multisafepay_payafter>
+            <multisafepay_bnplinstm>
+                <active>0</active>
+                <model>MultiSafepayBnplinstmFacade</model>
+                <order_status>pending</order_status>
+                <payment_action>initialize</payment_action>
+                <title>Pay After Delivery Installments</title>
+                <payment_type>redirect</payment_type>
+                <currency>EUR</currency>
+                <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
+                <can_use_checkout>1</can_use_checkout>
+                <can_use_internal>0</can_use_internal>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <is_gateway>1</is_gateway>
+                <sort_order>1</sort_order>
+                <allowspecific>0</allowspecific>
+                <allow_specific_currency>0</allow_specific_currency>
+                <allow_specific_shipping_method>0</allow_specific_shipping_method>
+                <allow_specific_customer_group>0</allow_specific_customer_group>
+                <allow_amount>0</allow_amount>
+                <custom_payment_link_lifetime>0</custom_payment_link_lifetime>
+                <transaction_type>redirect</transaction_type>
+                <is_multisafepay>1</is_multisafepay>
+                <gateway_code>BNPL_INSTM</gateway_code>
+            </multisafepay_bnplinstm>
+            <multisafepay_bnplmf>
+                <active>0</active>
+                <model>MultiSafepayBnplmfFacade</model>
+                <order_status>pending</order_status>
+                <payment_action>initialize</payment_action>
+                <title>Pay After Delivery</title>
+                <payment_type>redirect</payment_type>
+                <currency>EUR</currency>
+                <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
+                <can_use_checkout>1</can_use_checkout>
+                <can_use_internal>0</can_use_internal>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <is_gateway>1</is_gateway>
+                <sort_order>1</sort_order>
+                <allowspecific>0</allowspecific>
+                <allow_specific_currency>0</allow_specific_currency>
+                <allow_specific_shipping_method>0</allow_specific_shipping_method>
+                <allow_specific_customer_group>0</allow_specific_customer_group>
+                <allow_amount>0</allow_amount>
+                <custom_payment_link_lifetime>0</custom_payment_link_lifetime>
+                <transaction_type>redirect</transaction_type>
+                <is_multisafepay>1</is_multisafepay>
+                <gateway_code>BNPL_MF</gateway_code>
+            </multisafepay_bnplmf>
             <multisafepay_klarna>
                 <active>0</active>
                 <model>KlarnaFacade</model>
@@ -102,8 +221,12 @@
                 <title>Klarna - buy now, pay later</title>
                 <currency>EUR</currency>
                 <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>0</can_use_internal>
+                <override_order_confirmation_email>0</override_order_confirmation_email>
+                <order_confirmation_email/>
                 <can_refund>1</can_refund>
                 <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
                 <is_gateway>1</is_gateway>
@@ -123,11 +246,15 @@
                 <model>AfterpayFacade</model>
                 <order_status>pending</order_status>
                 <payment_action>initialize</payment_action>
-                <title>Afterpay</title>
+                <title>Riverty</title>
                 <currency>EUR</currency>
                 <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>0</can_use_internal>
+                <override_order_confirmation_email>0</override_order_confirmation_email>
+                <order_confirmation_email/>
                 <can_refund>1</can_refund>
                 <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
                 <is_gateway>1</is_gateway>
@@ -150,6 +277,8 @@
                 <title>Bancontact</title>
                 <currency>EUR</currency>
                 <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>1</can_use_internal>
                 <can_refund>1</can_refund>
@@ -166,6 +295,44 @@
                 <is_multisafepay>1</is_multisafepay>
                 <gateway_code>MISTERCASH</gateway_code>
             </multisafepay_bancontact>
+            <multisafepay_bancontact_recurring>
+                <active>0</active>
+                <model>MultiSafepayBancontactRecurringFacade</model>
+                <order_status>pending</order_status>
+                <payment_action>authorize</payment_action>
+                <title>Bancontact (Recurring)</title>
+                <currency>EUR</currency>
+                <can_authorize>1</can_authorize>
+                <can_authorize_vault>1</can_authorize_vault>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
+                <can_use_checkout>1</can_use_checkout>
+                <can_use_internal>0</can_use_internal>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <is_gateway>1</is_gateway>
+                <sort_order>1</sort_order>
+                <can_capture>0</can_capture>
+                <can_capture_partial>0</can_capture_partial>
+                <allowspecific>0</allowspecific>
+                <allow_specific_currency>0</allow_specific_currency>
+                <allow_specific_shipping_method>0</allow_specific_shipping_method>
+                <allow_specific_customer_group>0</allow_specific_customer_group>
+                <allow_amount>0</allow_amount>
+                <custom_payment_link_lifetime>0</custom_payment_link_lifetime>
+                <transaction_type>redirect</transaction_type>
+                <is_multisafepay>1</is_multisafepay>
+                <gateway_code>MISTERCASH</gateway_code>
+            </multisafepay_bancontact_recurring>
+            <multisafepay_bancontact_vault>
+                <active>0</active>
+                <model>MultiSafepayBancontactVaultFacade</model>
+                <title>Stored Card (Bancontact)</title>
+                <transaction_type>direct</transaction_type>
+                <instant_purchase>
+                    <supported>1</supported>
+                </instant_purchase>
+            </multisafepay_bancontact_vault>
             <multisafepay_amex>
                 <active>0</active>
                 <model>MultiSafepayAmexFacade</model>
@@ -175,6 +342,8 @@
                 <payment_type>redirect</payment_type>
                 <currency>EUR</currency>
                 <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>1</can_use_internal>
                 <can_refund>1</can_refund>
@@ -195,9 +364,12 @@
                 <model>MultiSafepayApplePayFacade</model>
                 <order_status>pending</order_status>
                 <payment_action>initialize</payment_action>
+                <direct_button>0</direct_button>
                 <title>Apple Pay</title>
                 <currency>EUR</currency>
                 <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>1</can_use_internal>
                 <can_refund>1</can_refund>
@@ -210,7 +382,6 @@
                 <allow_specific_customer_group>0</allow_specific_customer_group>
                 <allow_amount>0</allow_amount>
                 <custom_payment_link_lifetime>0</custom_payment_link_lifetime>
-                <transaction_type>redirect</transaction_type>
                 <is_multisafepay>1</is_multisafepay>
                 <gateway_code>APPLEPAY</gateway_code>
             </multisafepay_applepay>
@@ -222,6 +393,8 @@
                 <title>Belfius</title>
                 <currency>EUR</currency>
                 <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>1</can_use_internal>
                 <can_refund>1</can_refund>
@@ -238,16 +411,44 @@
                 <is_multisafepay>1</is_multisafepay>
                 <gateway_code>BELFIUS</gateway_code>
             </multisafepay_belfius>
+            <multisafepay_bizum>
+                <active>0</active>
+                <model>MultiSafepayBizumFacade</model>
+                <order_status>pending</order_status>
+                <payment_action>initialize</payment_action>
+                <title>Bizum</title>
+                <currency>EUR</currency>
+                <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
+                <can_use_checkout>1</can_use_checkout>
+                <can_use_internal>1</can_use_internal>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <is_gateway>1</is_gateway>
+                <sort_order>1</sort_order>
+                <allowspecific>0</allowspecific>
+                <allow_specific_currency>0</allow_specific_currency>
+                <allow_specific_shipping_method>0</allow_specific_shipping_method>
+                <allow_specific_customer_group>0</allow_specific_customer_group>
+                <allow_amount>0</allow_amount>
+                <custom_payment_link_lifetime>0</custom_payment_link_lifetime>
+                <transaction_type>direct</transaction_type>
+                <is_multisafepay>1</is_multisafepay>
+                <gateway_code>BIZUM</gateway_code>
+            </multisafepay_bizum>
             <multisafepay_creditcard>
                 <active>0</active>
                 <model>MultiSafepayCreditCardFacade</model>
                 <order_status>pending</order_status>
                 <payment_action>initialize</payment_action>
                 <payment_type>redirect</payment_type>
-                <title>Credit Card</title>
+                <title>Card payment</title>
                 <currency>EUR</currency>
                 <can_initialize>1</can_initialize>
                 <can_authorize_vault>1</can_authorize_vault>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>1</can_use_internal>
                 <can_refund>1</can_refund>
@@ -256,6 +457,8 @@
                 <sort_order>1</sort_order>
                 <can_capture>1</can_capture>
                 <can_capture_partial>1</can_capture_partial>
+                <manual_capture>0</manual_capture>
+                <payment_icon>default</payment_icon>
                 <allowspecific>0</allowspecific>
                 <allow_specific_currency>0</allow_specific_currency>
                 <allow_specific_shipping_method>0</allow_specific_shipping_method>
@@ -274,12 +477,17 @@
                 <currency>EUR</currency>
                 <can_authorize>1</can_authorize>
                 <can_authorize_vault>1</can_authorize_vault>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>0</can_use_internal>
                 <can_refund>1</can_refund>
                 <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
                 <is_gateway>1</is_gateway>
                 <sort_order>1</sort_order>
+                <can_capture>1</can_capture>
+                <can_capture_partial>1</can_capture_partial>
+                <manual_capture>0</manual_capture>
                 <allowspecific>0</allowspecific>
                 <allow_specific_currency>0</allow_specific_currency>
                 <allow_specific_shipping_method>0</allow_specific_shipping_method>
@@ -308,6 +516,8 @@
                 <currency>EUR</currency>
                 <can_authorize>1</can_authorize>
                 <can_authorize_vault>1</can_authorize_vault>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>0</can_use_internal>
                 <can_refund>1</can_refund>
@@ -316,6 +526,7 @@
                 <sort_order>1</sort_order>
                 <can_capture>1</can_capture>
                 <can_capture_partial>1</can_capture_partial>
+                <manual_capture>0</manual_capture>
                 <allowspecific>0</allowspecific>
                 <allow_specific_currency>0</allow_specific_currency>
                 <allow_specific_shipping_method>0</allow_specific_shipping_method>
@@ -344,6 +555,8 @@
                 <currency>EUR</currency>
                 <can_authorize>1</can_authorize>
                 <can_authorize_vault>1</can_authorize_vault>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>0</can_use_internal>
                 <can_refund>1</can_refund>
@@ -352,6 +565,7 @@
                 <sort_order>1</sort_order>
                 <can_capture>1</can_capture>
                 <can_capture_partial>1</can_capture_partial>
+                <manual_capture>0</manual_capture>
                 <allowspecific>0</allowspecific>
                 <allow_specific_currency>0</allow_specific_currency>
                 <allow_specific_shipping_method>0</allow_specific_shipping_method>
@@ -380,6 +594,8 @@
                 <currency>EUR</currency>
                 <can_authorize>1</can_authorize>
                 <can_authorize_vault>1</can_authorize_vault>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>0</can_use_internal>
                 <can_refund>1</can_refund>
@@ -413,6 +629,8 @@
                 <title>Dotpay</title>
                 <currency>EUR</currency>
                 <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>1</can_use_internal>
                 <can_refund>1</can_refund>
@@ -437,6 +655,8 @@
                 <title>EPS</title>
                 <currency>EUR</currency>
                 <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>1</can_use_internal>
                 <can_refund>1</can_refund>
@@ -461,6 +681,8 @@
                 <title>Giropay</title>
                 <currency>EUR</currency>
                 <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>1</can_use_internal>
                 <can_refund>1</can_refund>
@@ -477,6 +699,33 @@
                 <is_multisafepay>1</is_multisafepay>
                 <gateway_code>GIROPAY</gateway_code>
             </multisafepay_giropay>
+            <multisafepay_googlepay>
+                <active>0</active>
+                <model>MultiSafepayGooglePayFacade</model>
+                <order_status>pending</order_status>
+                <payment_action>initialize</payment_action>
+                <title>Google Pay</title>
+                <direct_button>0</direct_button>
+                <direct_button_mode>1</direct_button_mode>
+                <currency>EUR</currency>
+                <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
+                <can_use_checkout>1</can_use_checkout>
+                <can_use_internal>1</can_use_internal>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <is_gateway>1</is_gateway>
+                <sort_order>1</sort_order>
+                <allowspecific>0</allowspecific>
+                <allow_specific_currency>0</allow_specific_currency>
+                <allow_specific_shipping_method>0</allow_specific_shipping_method>
+                <allow_specific_customer_group>0</allow_specific_customer_group>
+                <allow_amount>0</allow_amount>
+                <custom_payment_link_lifetime>0</custom_payment_link_lifetime>
+                <is_multisafepay>1</is_multisafepay>
+                <gateway_code>GOOGLEPAY</gateway_code>
+            </multisafepay_googlepay>
             <multisafepay_idealqr>
                 <active>0</active>
                 <model>MultiSafepayIdealQRFacade</model>
@@ -485,6 +734,8 @@
                 <title>iDEAL QR</title>
                 <currency>EUR</currency>
                 <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>1</can_use_internal>
                 <can_refund>1</can_refund>
@@ -510,6 +761,8 @@
                 <payment_type>redirect</payment_type>
                 <currency>EUR</currency>
                 <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>1</can_use_internal>
                 <can_refund>1</can_refund>
@@ -518,6 +771,7 @@
                 <sort_order>1</sort_order>
                 <can_capture>1</can_capture>
                 <can_capture_partial>1</can_capture_partial>
+                <manual_capture>0</manual_capture>
                 <can_void>1</can_void>
                 <can_cancel>1</can_cancel>
                 <allowspecific>0</allowspecific>
@@ -529,6 +783,45 @@
                 <is_multisafepay>1</is_multisafepay>
                 <gateway_code>MAESTRO</gateway_code>
             </multisafepay_maestro>
+            <multisafepay_maestro_recurring>
+                <active>0</active>
+                <model>MultiSafepayMaestroRecurringFacade</model>
+                <order_status>pending</order_status>
+                <payment_action>authorize</payment_action>
+                <title>Maestro Debit Card (Recurring)</title>
+                <currency>EUR</currency>
+                <can_authorize>1</can_authorize>
+                <can_authorize_vault>1</can_authorize_vault>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
+                <can_use_checkout>1</can_use_checkout>
+                <can_use_internal>0</can_use_internal>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <is_gateway>1</is_gateway>
+                <sort_order>1</sort_order>
+                <can_capture>1</can_capture>
+                <can_capture_partial>1</can_capture_partial>
+                <manual_capture>0</manual_capture>
+                <allowspecific>0</allowspecific>
+                <allow_specific_currency>0</allow_specific_currency>
+                <allow_specific_shipping_method>0</allow_specific_shipping_method>
+                <allow_specific_customer_group>0</allow_specific_customer_group>
+                <allow_amount>0</allow_amount>
+                <custom_payment_link_lifetime>0</custom_payment_link_lifetime>
+                <transaction_type>redirect</transaction_type>
+                <is_multisafepay>1</is_multisafepay>
+                <gateway_code>MAESTRO</gateway_code>
+            </multisafepay_maestro_recurring>
+            <multisafepay_maestro_vault>
+                <active>0</active>
+                <model>MultiSafepayMaestroVaultFacade</model>
+                <title>Stored Maestro Card (MultiSafepay)</title>
+                <transaction_type>direct</transaction_type>
+                <instant_purchase>
+                    <supported>1</supported>
+                </instant_purchase>
+            </multisafepay_maestro_vault>
             <multisafepay_mastercard>
                 <active>0</active>
                 <model>MultiSafepayMastercardFacade</model>
@@ -538,12 +831,15 @@
                 <payment_type>redirect</payment_type>
                 <currency>EUR</currency>
                 <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>1</can_use_internal>
                 <can_refund>1</can_refund>
                 <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
                 <can_capture>1</can_capture>
                 <can_capture_partial>1</can_capture_partial>
+                <manual_capture>0</manual_capture>
                 <can_void>1</can_void>
                 <can_cancel>1</can_cancel>
                 <is_gateway>1</is_gateway>
@@ -557,6 +853,79 @@
                 <is_multisafepay>1</is_multisafepay>
                 <gateway_code>MASTERCARD</gateway_code>
             </multisafepay_mastercard>
+            <multisafepay_mbway>
+                <active>0</active>
+                <model>MultiSafepayMbwayFacade</model>
+                <order_status>pending</order_status>
+                <payment_action>initialize</payment_action>
+                <title>MB WAY</title>
+                <currency>EUR</currency>
+                <can_initialize>1</can_initialize>
+                <can_use_checkout>1</can_use_checkout>
+                <can_use_internal>1</can_use_internal>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <is_gateway>1</is_gateway>
+                <sort_order>1</sort_order>
+                <allowspecific>0</allowspecific>
+                <allow_specific_currency>0</allow_specific_currency>
+                <allow_specific_shipping_method>0</allow_specific_shipping_method>
+                <allow_specific_customer_group>0</allow_specific_customer_group>
+                <allow_amount>0</allow_amount>
+                <custom_payment_link_lifetime>0</custom_payment_link_lifetime>
+                <transaction_type>redirect</transaction_type>
+                <is_multisafepay>1</is_multisafepay>
+                <gateway_code>MBWAY</gateway_code>
+            </multisafepay_mbway>
+            <multisafepay_multibanco>
+                <active>0</active>
+                <model>MultiSafepayMultibancoFacade</model>
+                <order_status>pending</order_status>
+                <payment_action>initialize</payment_action>
+                <title>Multibanco</title>
+                <currency>EUR</currency>
+                <can_initialize>1</can_initialize>
+                <can_use_checkout>1</can_use_checkout>
+                <can_use_internal>1</can_use_internal>
+                <can_refund>0</can_refund>
+                <can_refund_partial_per_invoice>0</can_refund_partial_per_invoice>
+                <is_gateway>1</is_gateway>
+                <sort_order>1</sort_order>
+                <allowspecific>0</allowspecific>
+                <allow_specific_currency>0</allow_specific_currency>
+                <allow_specific_shipping_method>0</allow_specific_shipping_method>
+                <allow_specific_customer_group>0</allow_specific_customer_group>
+                <allow_amount>0</allow_amount>
+                <custom_payment_link_lifetime>0</custom_payment_link_lifetime>
+                <transaction_type>redirect</transaction_type>
+                <is_multisafepay>1</is_multisafepay>
+                <gateway_code>MULTIBANCO</gateway_code>
+            </multisafepay_multibanco>
+            <multisafepay_mybank>
+                <active>0</active>
+                <model>MyBankFacade</model>
+                <order_status>pending</order_status>
+                <payment_action>initialize</payment_action>
+                <title>MyBank</title>
+                <currency>EUR</currency>
+                <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
+                <can_use_checkout>1</can_use_checkout>
+                <can_use_internal>1</can_use_internal>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <is_gateway>1</is_gateway>
+                <sort_order>1</sort_order>
+                <allowspecific>0</allowspecific>
+                <allow_specific_currency>0</allow_specific_currency>
+                <allow_specific_shipping_method>0</allow_specific_shipping_method>
+                <allow_specific_customer_group>0</allow_specific_customer_group>
+                <allow_amount>0</allow_amount>
+                <custom_payment_link_lifetime>0</custom_payment_link_lifetime>
+                <is_multisafepay>1</is_multisafepay>
+                <gateway_code>MYBANK</gateway_code>
+            </multisafepay_mybank>
             <multisafepay_paysafecard>
                 <active>0</active>
                 <model>MultiSafepayPaysafecardFacade</model>
@@ -565,6 +934,8 @@
                 <title>Paysafecard</title>
                 <currency>EUR</currency>
                 <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>1</can_use_internal>
                 <can_refund>1</can_refund>
@@ -586,9 +957,11 @@
                 <model>MultiSafepaySofortFacade</model>
                 <order_status>pending</order_status>
                 <payment_action>initialize</payment_action>
-                <title>SOFORT Banking</title>
+                <title>Sofort</title>
                 <currency>EUR</currency>
                 <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>1</can_use_internal>
                 <can_refund>1</can_refund>
@@ -613,6 +986,8 @@
                 <title>TrustPay</title>
                 <currency>EUR</currency>
                 <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>1</can_use_internal>
                 <can_refund>1</can_refund>
@@ -638,6 +1013,8 @@
                 <payment_type>redirect</payment_type>
                 <currency>EUR</currency>
                 <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>1</can_use_internal>
                 <can_refund>1</can_refund>
@@ -647,6 +1024,7 @@
                 <can_authorize>1</can_authorize>
                 <can_capture>1</can_capture>
                 <can_capture_partial>1</can_capture_partial>
+                <manual_capture>0</manual_capture>
                 <can_void>1</can_void>
                 <can_cancel>1</can_cancel>
                 <allowspecific>0</allowspecific>
@@ -666,6 +1044,8 @@
                 <title>Alipay</title>
                 <currency>EUR</currency>
                 <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>1</can_use_internal>
                 <can_refund>1</can_refund>
@@ -682,6 +1062,58 @@
                 <is_multisafepay>1</is_multisafepay>
                 <gateway_code>ALIPAY</gateway_code>
             </multisafepay_alipay>
+            <multisafepay_alipayplus>
+                <active>0</active>
+                <model>MultiSafepayAlipayplusFacade</model>
+                <order_status>pending</order_status>
+                <payment_action>initialize</payment_action>
+                <title>Alipay+ Partner</title>
+                <currency>EUR</currency>
+                <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
+                <can_use_checkout>1</can_use_checkout>
+                <can_use_internal>1</can_use_internal>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <is_gateway>1</is_gateway>
+                <sort_order>1</sort_order>
+                <allowspecific>0</allowspecific>
+                <allow_specific_currency>0</allow_specific_currency>
+                <allow_specific_shipping_method>0</allow_specific_shipping_method>
+                <allow_specific_customer_group>0</allow_specific_customer_group>
+                <allow_amount>0</allow_amount>
+                <custom_payment_link_lifetime>0</custom_payment_link_lifetime>
+                <transaction_type>direct</transaction_type>
+                <is_multisafepay>1</is_multisafepay>
+                <gateway_code>ALIPAYPLUS</gateway_code>
+            </multisafepay_alipayplus>
+            <multisafepay_amazonpay>
+                <active>0</active>
+                <model>MultiSafepayAmazonPayFacade</model>
+                <order_status>pending</order_status>
+                <payment_action>initialize</payment_action>
+                <title>Amazon Pay</title>
+                <currency>EUR</currency>
+                <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
+                <can_use_checkout>1</can_use_checkout>
+                <can_use_internal>1</can_use_internal>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <is_gateway>1</is_gateway>
+                <sort_order>1</sort_order>
+                <allowspecific>0</allowspecific>
+                <allow_specific_currency>0</allow_specific_currency>
+                <allow_specific_shipping_method>0</allow_specific_shipping_method>
+                <allow_specific_customer_group>0</allow_specific_customer_group>
+                <allow_amount>0</allow_amount>
+                <custom_payment_link_lifetime>0</custom_payment_link_lifetime>
+                <transaction_type>redirect</transaction_type>
+                <is_multisafepay>1</is_multisafepay>
+                <gateway_code>AMAZONBTN</gateway_code>
+            </multisafepay_amazonpay>
             <multisafepay_directbanktransfer>
                 <active>0</active>
                 <model>MultiSafepayDirectBankTransferFacade</model>
@@ -690,6 +1122,8 @@
                 <title>Request To Pay</title>
                 <currency>EUR</currency>
                 <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>1</can_use_internal>
                 <can_refund>1</can_refund>
@@ -714,8 +1148,12 @@
                 <title>Bank Transfer</title>
                 <currency>EUR</currency>
                 <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>1</can_use_internal>
+                <override_order_confirmation_email>1</override_order_confirmation_email>
+                <order_confirmation_email/>
                 <can_refund>1</can_refund>
                 <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
                 <is_gateway>1</is_gateway>
@@ -738,8 +1176,12 @@
                 <title>Santander Pay per Month</title>
                 <currency>EUR</currency>
                 <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>0</can_use_internal>
+                <override_order_confirmation_email>0</override_order_confirmation_email>
+                <order_confirmation_email/>
                 <can_refund>1</can_refund>
                 <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
                 <is_gateway>1</is_gateway>
@@ -762,6 +1204,8 @@
                 <title>CBC</title>
                 <currency>EUR</currency>
                 <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>1</can_use_internal>
                 <can_refund>1</can_refund>
@@ -786,6 +1230,8 @@
                 <title>Direct Debit</title>
                 <currency>EUR</currency>
                 <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>1</can_use_internal>
                 <can_refund>1</can_refund>
@@ -802,6 +1248,44 @@
                 <is_multisafepay>1</is_multisafepay>
                 <gateway_code>DIRDEB</gateway_code>
             </multisafepay_directdebit>
+            <multisafepay_directdebit_recurring>
+                <active>0</active>
+                <model>MultiSafepayDirectDebitRecurringFacade</model>
+                <order_status>pending</order_status>
+                <payment_action>authorize</payment_action>
+                <title>Direct Debit (Recurring)</title>
+                <currency>EUR</currency>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
+                <can_authorize>1</can_authorize>
+                <can_authorize_vault>1</can_authorize_vault>
+                <can_use_checkout>1</can_use_checkout>
+                <can_use_internal>0</can_use_internal>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <is_gateway>1</is_gateway>
+                <sort_order>1</sort_order>
+                <can_capture>0</can_capture>
+                <can_capture_partial>0</can_capture_partial>
+                <allowspecific>0</allowspecific>
+                <allow_specific_currency>0</allow_specific_currency>
+                <allow_specific_shipping_method>0</allow_specific_shipping_method>
+                <allow_specific_customer_group>0</allow_specific_customer_group>
+                <allow_amount>0</allow_amount>
+                <custom_payment_link_lifetime>0</custom_payment_link_lifetime>
+                <transaction_type>redirect</transaction_type>
+                <is_multisafepay>1</is_multisafepay>
+                <gateway_code>DIRDEB</gateway_code>
+            </multisafepay_directdebit_recurring>
+            <multisafepay_directdebit_vault>
+                <active>0</active>
+                <model>MultiSafepayDirectDebitVaultFacade</model>
+                <title>Stored Bank Account (Direct Debit)</title>
+                <transaction_type>direct</transaction_type>
+                <instant_purchase>
+                    <supported>1</supported>
+                </instant_purchase>
+            </multisafepay_directdebit_vault>
             <multisafepay_einvoicing>
                 <active>0</active>
                 <model>MultiSafepayEinvoicingFacade</model>
@@ -810,19 +1294,27 @@
                 <title>E-invoicing</title>
                 <currency>EUR</currency>
                 <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>1</can_use_internal>
+                <override_order_confirmation_email>0</override_order_confirmation_email>
+                <order_confirmation_email/>
                 <can_refund>1</can_refund>
                 <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
                 <is_gateway>1</is_gateway>
                 <sort_order>1</sort_order>
+                <use_custom_invoice_url>0</use_custom_invoice_url>
+                <custom_invoice_url />
                 <allowspecific>0</allowspecific>
                 <allow_specific_currency>0</allow_specific_currency>
                 <allow_specific_shipping_method>0</allow_specific_shipping_method>
                 <allow_specific_customer_group>0</allow_specific_customer_group>
                 <allow_amount>0</allow_amount>
                 <custom_payment_link_lifetime>0</custom_payment_link_lifetime>
+                <use_customer_group_collecting_flows>0</use_customer_group_collecting_flows>
                 <transaction_type>direct</transaction_type>
+                <checkout_fields>date_of_birth,account_number</checkout_fields>
                 <is_multisafepay>1</is_multisafepay>
                 <gateway_code>EINVOICE</gateway_code>
             </multisafepay_einvoicing>
@@ -834,6 +1326,8 @@
                 <title>ING Home'Pay</title>
                 <currency>EUR</currency>
                 <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>1</can_use_internal>
                 <can_refund>1</can_refund>
@@ -858,6 +1352,8 @@
                 <title>KBC</title>
                 <currency>EUR</currency>
                 <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>1</can_use_internal>
                 <can_refund>1</can_refund>
@@ -882,6 +1378,8 @@
                 <title>Paypal</title>
                 <currency>EUR</currency>
                 <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>1</can_use_internal>
                 <can_refund>1</can_refund>
@@ -906,6 +1404,8 @@
                 <title>Trustly</title>
                 <currency>EUR</currency>
                 <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>1</can_use_internal>
                 <can_refund>1</can_refund>
@@ -927,11 +1427,15 @@
                 <model>MultiSafepayIn3Facade</model>
                 <order_status>pending</order_status>
                 <payment_action>initialize</payment_action>
-                <title>in3</title>
+                <title>iDEAL+in3</title>
                 <currency>EUR</currency>
                 <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>0</can_use_internal>
+                <override_order_confirmation_email>0</override_order_confirmation_email>
+                <order_confirmation_email/>
                 <can_refund>1</can_refund>
                 <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
                 <is_gateway>1</is_gateway>
@@ -949,6 +1453,113 @@
                 <is_multisafepay>1</is_multisafepay>
                 <gateway_code>IN3</gateway_code>
             </multisafepay_in3>
+            <multisafepay_in3b2b>
+                <active>0</active>
+                <model>MultiSafepayIn3B2bFacade</model>
+                <order_status>pending</order_status>
+                <payment_action>initialize</payment_action>
+                <title>in3: Betaal in 3 delen (0% rente)</title>
+                <payment_type>redirect</payment_type>
+                <currency>EUR</currency>
+                <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
+                <can_use_checkout>1</can_use_checkout>
+                <can_use_internal>0</can_use_internal>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <is_gateway>1</is_gateway>
+                <sort_order>1</sort_order>
+                <allowspecific>0</allowspecific>
+                <allow_specific_currency>0</allow_specific_currency>
+                <allow_specific_shipping_method>0</allow_specific_shipping_method>
+                <allow_specific_customer_group>0</allow_specific_customer_group>
+                <custom_payment_link_lifetime>0</custom_payment_link_lifetime>
+                <transaction_type>redirect</transaction_type>
+                <is_multisafepay>1</is_multisafepay>
+                <gateway_code>IN3B2B</gateway_code>
+            </multisafepay_in3b2b>
+            <multisafepay_wechatpay>
+                <active>0</active>
+                <model>MultiSafepayWeChatPayFacade</model>
+                <order_status>pending</order_status>
+                <payment_action>initialize</payment_action>
+                <title>WeChat Pay</title>
+                <currency>EUR</currency>
+                <can_initialize>1</can_initialize>
+                <can_use_checkout>1</can_use_checkout>
+                <can_use_internal>1</can_use_internal>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <is_gateway>1</is_gateway>
+                <sort_order>1</sort_order>
+                <allowspecific>0</allowspecific>
+                <allow_specific_currency>0</allow_specific_currency>
+                <allow_specific_shipping_method>0</allow_specific_shipping_method>
+                <allow_specific_customer_group>0</allow_specific_customer_group>
+                <allow_amount>0</allow_amount>
+                <custom_payment_link_lifetime>0</custom_payment_link_lifetime>
+                <transaction_type>redirect</transaction_type>
+                <is_multisafepay>1</is_multisafepay>
+                <gateway_code>WECHAT</gateway_code>
+            </multisafepay_wechatpay>
+            <multisafepay_zinia>
+                <active>0</active>
+                <model>MultiSafepayZiniaFacade</model>
+                <order_status>pending</order_status>
+                <payment_action>initialize</payment_action>
+                <title>Zinia</title>
+                <payment_type>redirect</payment_type>
+                <currency>EUR</currency>
+                <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
+                <can_use_checkout>1</can_use_checkout>
+                <can_use_internal>0</can_use_internal>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <is_gateway>1</is_gateway>
+                <sort_order>1</sort_order>
+                <allowspecific>1</allowspecific>
+                <specificcountry>NL</specificcountry>
+                <allow_specific_currency>0</allow_specific_currency>
+                <allow_specific_shipping_method>0</allow_specific_shipping_method>
+                <allow_specific_customer_group>0</allow_specific_customer_group>
+                <allow_amount>1</allow_amount>
+                <min_amount>50</min_amount>
+                <max_amount>750</max_amount>
+                <custom_payment_link_lifetime>0</custom_payment_link_lifetime>
+                <transaction_type>redirect</transaction_type>
+                <is_multisafepay>1</is_multisafepay>
+                <gateway_code>ZINIA</gateway_code>
+            </multisafepay_zinia>
+            <multisafepay_billink>
+                <active>0</active>
+                <model>MultiSafepayBillinkFacade</model>
+                <order_status>pending</order_status>
+                <payment_action>initialize</payment_action>
+                <title>Billink</title>
+                <payment_type>redirect</payment_type>
+                <currency>EUR</currency>
+                <can_initialize>1</can_initialize>
+                <can_fetch_transaction_information>1</can_fetch_transaction_information>
+                <can_fetch_transaction_info>1</can_fetch_transaction_info>
+                <can_use_checkout>1</can_use_checkout>
+                <can_use_internal>0</can_use_internal>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <is_gateway>1</is_gateway>
+                <sort_order>1</sort_order>
+                <allowspecific>1</allowspecific>
+                <specificcountry>NL,BE</specificcountry>
+                <allow_specific_currency>0</allow_specific_currency>
+                <allow_specific_shipping_method>0</allow_specific_shipping_method>
+                <allow_specific_customer_group>0</allow_specific_customer_group>
+                <custom_payment_link_lifetime>0</custom_payment_link_lifetime>
+                <transaction_type>redirect</transaction_type>
+                <is_multisafepay>1</is_multisafepay>
+                <gateway_code>BILLINK</gateway_code>
+            </multisafepay_billink>
             <multisafepay_genericgateway>
                 <active>0</active>
                 <model>MultiSafepayGenericGatewayFacade</model>
@@ -1016,7 +1627,7 @@
                 <custom_payment_link_lifetime>0</custom_payment_link_lifetime>
                 <transaction_type>redirect</transaction_type>
                 <is_multisafepay>1</is_multisafepay>
-                <gateway_code>BEAUTYANDWELLNESS</gateway_code>
+                <gateway_code>BEAUTYWELL</gateway_code>
             </multisafepay_beautyandwellness>
             <multisafepay_boekenbon>
                 <active>0</active>
@@ -1058,7 +1669,7 @@
                 <custom_payment_link_lifetime>0</custom_payment_link_lifetime>
                 <transaction_type>redirect</transaction_type>
                 <is_multisafepay>1</is_multisafepay>
-                <gateway_code>FASHIONCHEQUE</gateway_code>
+                <gateway_code>FASHIONCHQ</gateway_code>
             </multisafepay_fashioncheque>
             <multisafepay_fashiongiftcard>
                 <active>0</active>
@@ -1079,7 +1690,7 @@
                 <custom_payment_link_lifetime>0</custom_payment_link_lifetime>
                 <transaction_type>redirect</transaction_type>
                 <is_multisafepay>1</is_multisafepay>
-                <gateway_code>FASHIONGIFTCARD</gateway_code>
+                <gateway_code>FASHIONGFT</gateway_code>
             </multisafepay_fashiongiftcard>
             <multisafepay_fietsenbon>
                 <active>0</active>
@@ -1102,6 +1713,27 @@
                 <is_multisafepay>1</is_multisafepay>
                 <gateway_code>FIETSENBON</gateway_code>
             </multisafepay_fietsenbon>
+            <multisafepay_edenred>
+                <active>0</active>
+                <model>MultiSafepayEdenredFacade</model>
+                <order_status>pending</order_status>
+                <payment_action>initialize</payment_action>
+                <title>Edenred</title>
+                <currency>EUR</currency>
+                <can_initialize>1</can_initialize>
+                <can_use_checkout>1</can_use_checkout>
+                <is_gateway>1</is_gateway>
+                <sort_order>1</sort_order>
+                <allowspecific>0</allowspecific>
+                <allow_specific_currency>0</allow_specific_currency>
+                <allow_specific_shipping_method>0</allow_specific_shipping_method>
+                <allow_specific_customer_group>0</allow_specific_customer_group>
+                <allow_amount>0</allow_amount>
+                <custom_payment_link_lifetime>0</custom_payment_link_lifetime>
+                <transaction_type>redirect</transaction_type>
+                <is_multisafepay>1</is_multisafepay>
+                <gateway_code></gateway_code>
+            </multisafepay_edenred>
             <multisafepay_gezondheidsbon>
                 <active>0</active>
                 <model>MultiSafepayGezondheidsbonFacade</model>
@@ -1121,7 +1753,7 @@
                 <custom_payment_link_lifetime>0</custom_payment_link_lifetime>
                 <transaction_type>redirect</transaction_type>
                 <is_multisafepay>1</is_multisafepay>
-                <gateway_code>GEZONDHEIDSBON</gateway_code>
+                <gateway_code>GEZONDHEID</gateway_code>
             </multisafepay_gezondheidsbon>
             <multisafepay_givacard>
                 <active>0</active>
@@ -1205,7 +1837,7 @@
                 <custom_payment_link_lifetime>0</custom_payment_link_lifetime>
                 <transaction_type>redirect</transaction_type>
                 <is_multisafepay>1</is_multisafepay>
-                <gateway_code>NATIONALETUINBON</gateway_code>
+                <gateway_code>NATNLETUIN</gateway_code>
             </multisafepay_nationaletuinbon>
             <multisafepay_parfumcadeaukaart>
                 <active>0</active>
@@ -1227,7 +1859,7 @@
                 <custom_payment_link_lifetime>0</custom_payment_link_lifetime>
                 <transaction_type>redirect</transaction_type>
                 <is_multisafepay>1</is_multisafepay>
-                <gateway_code>PARFUMCADEAUKAART</gateway_code>
+                <gateway_code>PARFUMCADE</gateway_code>
             </multisafepay_parfumcadeaukaart>
             <multisafepay_podiumcadeaukaart>
                 <active>0</active>
@@ -1271,6 +1903,29 @@
                 <is_multisafepay>1</is_multisafepay>
                 <gateway_code>SPORTENFIT</gateway_code>
             </multisafepay_sportenfit>
+            <multisafepay_vvvcadeaubon>
+                <active>0</active>
+                <model>MultiSafepayVVVcadeaubonFacade</model>
+                <order_status>pending</order_status>
+                <payment_action>initialize</payment_action>
+                <title>VVV cadeaukaart</title>
+                <currency>EUR</currency>
+                <can_initialize>1</can_initialize>
+                <can_use_checkout>1</can_use_checkout>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <is_gateway>1</is_gateway>
+                <sort_order>1</sort_order>
+                <allowspecific>0</allowspecific>
+                <allow_specific_currency>0</allow_specific_currency>
+                <allow_specific_shipping_method>0</allow_specific_shipping_method>
+                <allow_specific_customer_group>0</allow_specific_customer_group>
+                <allow_amount>0</allow_amount>
+                <custom_payment_link_lifetime>0</custom_payment_link_lifetime>
+                <transaction_type>redirect</transaction_type>
+                <is_multisafepay>1</is_multisafepay>
+                <gateway_code>VVVBON</gateway_code>
+            </multisafepay_vvvcadeaubon>
             <multisafepay_vvvcadeaukaart>
                 <active>0</active>
                 <model>MultiSafepayVVVcadeaukaartFacade</model>
@@ -1311,7 +1966,7 @@
                 <custom_payment_link_lifetime>0</custom_payment_link_lifetime>
                 <transaction_type>redirect</transaction_type>
                 <is_multisafepay>1</is_multisafepay>
-                <gateway_code>WEBSHOPGIFTCARD</gateway_code>
+                <gateway_code>WEBSHOPGFT</gateway_code>
             </multisafepay_webshopgiftcard>
             <multisafepay_wellnessgiftcard>
                 <active>0</active>
@@ -1398,5 +2053,14 @@
                 <gateway_code>YOURGIFT</gateway_code>
             </multisafepay_yourgift>
         </payment>
+        <csp>
+            <policies>
+                <storefront>
+                    <frame-ancestors>
+                        <inline>0</inline>
+                    </frame-ancestors>
+                </storefront>
+            </policies>
+        </csp>
     </default>
 </config>

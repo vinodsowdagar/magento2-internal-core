@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,9 +7,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
@@ -20,7 +17,6 @@ namespace MultiSafepay\ConnectCore\Model\Api\Builder\OrderRequestBuilder\Custome
 use Magento\Sales\Api\Data\OrderAddressInterface;
 use MultiSafepay\ValueObject\Customer\Address;
 use MultiSafepay\ValueObject\Customer\AddressParser;
-use MultiSafepay\ValueObject\Customer\Country;
 
 class AddressBuilder
 {
@@ -57,10 +53,10 @@ class AddressBuilder
             $orderRequestAddress->addState($address->getRegion());
         }
 
-        return $orderRequestAddress->addCity($address->getCity())
-            ->addCountry(new Country($address->getCountryId()))
-            ->addHouseNumber($streetAndHouseNumber[1])
-            ->addStreetName($streetAndHouseNumber[0])
-            ->addZipCode(trim($address->getPostcode()));
+        return $orderRequestAddress->addCity($address->getCity() ?? '')
+            ->addCountryCode($address->getCountryId())
+            ->addHouseNumber($streetAndHouseNumber[1] ?? '')
+            ->addStreetName($streetAndHouseNumber[0] ?? '')
+            ->addZipCode(trim($address->getPostcode() ?? ''));
     }
 }

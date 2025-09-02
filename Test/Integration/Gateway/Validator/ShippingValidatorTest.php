@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,9 +7,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
@@ -20,6 +17,7 @@ namespace MultiSafepay\ConnectCore\Test\Integration\Gateway\Validator;
 use Exception;
 use Magento\Payment\Gateway\Config\Config as PaymentGatewayConfig;
 use MultiSafepay\ConnectCore\Gateway\Validator\ShippingValidator;
+use MultiSafepay\ConnectCore\Model\Ui\Gateway\VisaConfigProvider;
 use MultiSafepay\ConnectCore\Test\Integration\AbstractTestCase;
 
 class ShippingValidatorTest extends AbstractTestCase
@@ -39,7 +37,9 @@ class ShippingValidatorTest extends AbstractTestCase
 
         /** @var ShippingValidator $shippingValidator */
         $shippingValidator = $this->getObjectManager()->get(ShippingValidator::class);
-        $this->assertFalse($shippingValidator->validate($quote, $config));
+        $this->assertFalse(
+            $shippingValidator->validate($quote, $config, VisaConfigProvider::CODE)
+        );
     }
 
     /**
@@ -58,6 +58,6 @@ class ShippingValidatorTest extends AbstractTestCase
 
         /** @var ShippingValidator $shippingValidator */
         $shippingValidator = $this->getObjectManager()->get(ShippingValidator::class);
-        $this->assertTrue($shippingValidator->validate($quote, $config));
+        $this->assertTrue($shippingValidator->validate($quote, $config, VisaConfigProvider::CODE));
     }
 }

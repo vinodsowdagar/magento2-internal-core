@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,9 +7,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
@@ -20,6 +17,7 @@ namespace MultiSafepay\ConnectCore\Util;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Api\Data\OrderInterface;
+use Magento\Store\Model\Store;
 use Magento\Store\Model\StoreManagerInterface;
 use MultiSafepay\ConnectCore\Config\Config;
 
@@ -77,7 +75,10 @@ class CurrencyUtil
             return (string)$orderBaseCurrencyCode;
         }
 
-        return (string)$this->storeManager->getStore()->getBaseCurrencyCode();
+        /** @var Store $store */
+        $store = $this->storeManager->getStore();
+
+        return (string)$store->getBaseCurrencyCode();
     }
 
     /**
@@ -95,7 +96,10 @@ class CurrencyUtil
             return (string)$orderCurrencyCode;
         }
 
-        $orderCurrencyCode = $this->storeManager->getStore($order->getStoreId())->getCurrentCurrency()->getCode();
+        /** @var Store $store */
+        $store =  $this->storeManager->getStore($order->getStoreId());
+
+        $orderCurrencyCode = $store->getCurrentCurrency()->getCode();
 
         if (!empty($orderCurrencyCode)) {
             return (string)$orderCurrencyCode;

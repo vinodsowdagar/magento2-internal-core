@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,9 +7,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
@@ -30,21 +27,9 @@ class PayafterConfigProvider extends GenericConfigProvider
      */
     public function getImage(): string
     {
-        $path = $this->getPath();
+        $path = $this->getImagePath($this->getCode());
         $this->assetRepository->createAsset($path);
 
         return $this->assetRepository->getUrl($path);
-    }
-
-    /**
-     * @return string
-     */
-    public function getPath(): string
-    {
-        if ($this->localeResolver->getLocale() === 'nl_NL') {
-            return 'MultiSafepay_ConnectCore::images/' . $this->getCode() . '-nl.png';
-        }
-
-        return 'MultiSafepay_ConnectCore::images/' . $this->getCode() . '-en.png';
     }
 }

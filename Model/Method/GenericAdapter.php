@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,9 +7,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
@@ -125,10 +122,10 @@ class GenericAdapter extends Adapter
         $code,
         $formBlockType,
         $infoBlockType,
-        CommandPoolInterface $commandPool = null,
-        ValidatorPoolInterface $validatorPool = null,
-        CommandManagerInterface $commandExecutor = null,
-        LoggerInterface $logger = null
+        ?CommandPoolInterface $commandPool = null,
+        ?ValidatorPoolInterface $validatorPool = null,
+        ?CommandManagerInterface $commandExecutor = null,
+        ?LoggerInterface $logger = null
     ) {
         $this->countryValidatorFactory = $countryValidatorFactory;
         $this->currencyValidatorFactory = $currencyValidatorFactory;
@@ -139,7 +136,6 @@ class GenericAdapter extends Adapter
         $this->eventManager = $eventManager;
         $this->paymentDataObjectFactory = $paymentDataObjectFactory;
         $this->commandExecutor = $commandExecutor;
-        $this->paymentConfig = $paymentConfig;
 
         parent::__construct(
             $eventManager,
@@ -291,7 +287,7 @@ class GenericAdapter extends Adapter
     /**
      * @inheritdoc
      */
-    public function isAvailable(CartInterface $quote = null)
+    public function isAvailable(?CartInterface $quote = null)
     {
         if (!$this->isActive($quote ? $quote->getStoreId() : null)) {
             return false;
@@ -317,7 +313,7 @@ class GenericAdapter extends Adapter
      */
     public function isActive($storeId = null): bool
     {
-        return (bool)$this->getConfiguredValue('active', $storeId);
+        return (bool)$this->getConfiguredValue('active', (int)$storeId);
     }
 
     /**
@@ -335,13 +331,12 @@ class GenericAdapter extends Adapter
     /**
      * @param string $currencyCode
      * @return bool
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function canUseForCurrency($currencyCode): bool
     {
-        return $this->validateByInstance(
-            $this->currencyValidatorFactory,
-            ['currency' => $currencyCode, 'storeId' => $this->getStore()]
-        );
+        return true;
     }
 
     /**
@@ -359,7 +354,7 @@ class GenericAdapter extends Adapter
      * @param int|null $storeId
      * @return bool|mixed|null
      */
-    private function getConfiguredValue(string $field, $storeId = null)
+    private function getConfiguredValue(string $field, ?int $storeId = null)
     {
         $this->setPaymentConfigCode($this->code);
         $storeId = $storeId ?: $this->getStore();
@@ -384,12 +379,12 @@ class GenericAdapter extends Adapter
 
     /**
      * @param string $field
-     * @param null $storeId
+     * @param int|null $storeId
      * @return bool|mixed|null
      */
-    public function getConfigData($field, $storeId = null)
+    public function getConfigData($field, $storeId = null) //phpcs:ignore
     {
-        return $this->getConfiguredValue($field, $storeId);
+        return $this->getConfiguredValue($field, (int)$storeId);
     }
 
     /**
@@ -589,7 +584,7 @@ class GenericAdapter extends Adapter
     /**
      * @inheritdoc
      */
-    public function sale(InfoInterface $payment, float $amount): ?ResultInterface
+    public function sale(InfoInterface $payment, float $amount)
     {
         $this->executeCommand(
             'sale',

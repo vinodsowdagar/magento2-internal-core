@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,9 +7,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
@@ -19,20 +16,21 @@ namespace MultiSafepay\ConnectCore\Util;
 
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Stdlib\DateTime\DateTime;
-use Magento\Sales\Api\Data\OrderPaymentInterface;
+use Magento\Payment\Model\InfoInterface;
+use Magento\Sales\Model\Order\Payment;
 use MultiSafepay\Api\Transactions\CaptureRequest;
 use MultiSafepay\Api\Transactions\Transaction as TransactionStatus;
-use MultiSafepay\ConnectAdminhtml\Model\Config\Source\PaymentAction;
 use MultiSafepay\ConnectCore\Model\Ui\Gateway\CreditCardConfigProvider;
 use MultiSafepay\ConnectCore\Model\Ui\Gateway\MaestroConfigProvider;
 use MultiSafepay\ConnectCore\Model\Ui\Gateway\MastercardConfigProvider;
 use MultiSafepay\ConnectCore\Model\Ui\Gateway\VisaConfigProvider;
-use MultiSafepay\ConnectCore\Observer\Gateway\CreditCardDataAssignObserver;
 
 class CaptureUtil
 {
     public const PAYMENT_ACTION_AUTHORIZE_ONLY = 'authorize';
     public const PAYMENT_ACTION_AUTHORIZE_AND_CAPTURE = 'initialize';
+    public const CAPTURE_TRANSACTION_TYPE_MANUAL = 'manual';
+    public const MULTISAFEPAY_CAPTURE_DATA_FIELD_NAME = "multisafepay_capture_data";
 
     public const AVAILABLE_MANUAL_CAPTURE_METHODS = [
         VisaConfigProvider::CODE,
@@ -56,8 +54,9 @@ class CaptureUtil
      *
      * @param DateTime $dateTime
      */
-    public function __construct(DateTime $dateTime)
-    {
+    public function __construct(
+        DateTime $dateTime
+    ) {
         $this->dateTime = $dateTime;
     }
 
@@ -82,7 +81,7 @@ class CaptureUtil
     {
         $paymentDetails = $transaction['payment_details'] ?? [];
 
-        return isset($paymentDetails['financial_status']) && isset($paymentDetails['capture'])
+        return isset($transaction['financial_status']) && isset($paymentDetails['capture'])
                && $transaction['financial_status'] === TransactionStatus::INITIALIZED
                && $paymentDetails['capture'] === CaptureRequest::CAPTURE_MANUAL_TYPE;
     }
@@ -103,26 +102,42 @@ class CaptureUtil
     }
 
     /**
-     * @param OrderPaymentInterface $payment
+     * @param Payment $payment
      * @return bool
      * @throws LocalizedException
      */
-    public function isCaptureManualPayment(OrderPaymentInterface $payment): bool
+    public function isManualCaptureEnabled(Payment $payment): bool
     {
-        if (!in_array($payment->getMethod(), self::AVAILABLE_MANUAL_CAPTURE_METHODS)
-            || !($payment->getMethodInstance()->getConfigPaymentAction()
-                 === self::PAYMENT_ACTION_AUTHORIZE_ONLY)
+        if ($payment->getMethodInstance()->getConfigData('manual_capture') === '1'
+            && $payment->getMethodInstance()->getConfigPaymentAction() === 'authorize'
         ) {
-            return false;
+            return true;
         }
 
-        if (in_array($payment->getMethod(), [CreditCardConfigProvider::CODE, CreditCardConfigProvider::VAULT_CODE])) {
-            $cardBrand = $payment->getMethod() === CreditCardConfigProvider::VAULT_CODE ? $payment->getType()
-                : $payment->getAdditionalInformation(CreditCardDataAssignObserver::CREDIT_CARD_BRAND_PARAM_NAME);
+        return false;
+    }
 
-            return $cardBrand && in_array($cardBrand, self::AVAILABLE_MANUAL_CAPTURE_CARD_BRANDS);
+    /**
+     * @param string $transactionId
+     * @param InfoInterface $payment
+     * @return array|null
+     */
+    public function getCaptureDataByTransactionId(string $transactionId, InfoInterface $payment): ?array
+    {
+        $captures = $payment->getAdditionalInformation(self::MULTISAFEPAY_CAPTURE_DATA_FIELD_NAME);
+
+        if (!$captures) {
+            return null;
         }
 
-        return true;
+        foreach ($captures as $capture) {
+            if (isset($capture['transaction_id'])
+                && $transactionId === (string)$capture['transaction_id']
+            ) {
+                return $capture;
+            }
+        }
+
+        return null;
     }
 }

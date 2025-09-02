@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,9 +7,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
@@ -28,6 +25,30 @@ use ReflectionException;
 
 class OrderItemBuilderTest extends AbstractTestCase
 {
+    /**
+     * @magentoDataFixture   Magento/Customer/_files/customer.php
+     * @magentoDataFixture   Magento/Catalog/_files/product_simple.php
+     *
+     * @return void
+     * @throws LocalizedException
+     * @throws Exception
+     */
+    public function testOrderItemTax(): void
+    {
+        $this->includeFixtureFile('order_with_tax', true);
+        $order = $this->getOrder();
+
+        $currency = $this->getCurrencyUtil()->getCurrencyCode($order);
+
+        $items = $this->getOrderItemBuilder()->build($order, $currency);
+        $item = $this->convertObjectToArray($items[0]);
+
+        $expectedItems = $order->getItems();
+        $expectedItem = reset($expectedItems);
+
+        self::assertSame((float)$expectedItem->getTaxPercent(), $item['taxRate']);
+    }
+
     /**
      * @magentoDataFixture   Magento/Sales/_files/order.php
      * @magentoConfigFixture default_store multisafepay/general/mode 0
@@ -49,7 +70,7 @@ class OrderItemBuilderTest extends AbstractTestCase
 
         self::assertSame($expectedItem->getName(), $item['name']);
         self::assertSame((float)$expectedItem->getQtyOrdered(), $item['quantity']);
-        self::assertSame($expectedItem->getSku(), $item['merchantItemId']);
+        self::assertSame($expectedItem->getSku() . '_', $item['merchantItemId']);
         self::assertSame($expectedItem->getDescription() ?? '', $item['description']);
         self::assertSame((float)$expectedItem->getTaxPercent(), $item['taxRate']);
 

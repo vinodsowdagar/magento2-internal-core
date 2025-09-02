@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,9 +7,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
@@ -20,6 +17,7 @@ namespace MultiSafepay\ConnectCore\Gateway\Request\Builder;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Payment\Gateway\Config\Config;
+use Magento\Payment\Gateway\Helper\SubjectReader;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 use Magento\Sales\Exception\CouldNotRefundException;
 use MultiSafepay\ConnectCore\Model\Ui\Gateway\GenericGatewayConfigProvider;
@@ -59,6 +57,8 @@ class GenericGatewayRefundTransactionBuilder implements BuilderInterface
     }
 
     /**
+     * Build the refund transaction data
+     *
      * @param array $buildSubject
      * @return array
      * @throws NoSuchEntityException
@@ -67,11 +67,35 @@ class GenericGatewayRefundTransactionBuilder implements BuilderInterface
      */
     public function build(array $buildSubject): array
     {
-        $this->config->setMethodCode(GenericGatewayConfigProvider::CODE);
+        $paymentDataObject = SubjectReader::readPayment($buildSubject);
+        $methodInstance = $paymentDataObject->getPayment()->getMethodInstance();
+        $methodCode = $methodInstance->getCode();
+        $storeId = (int)$methodInstance->getStore();
 
-        if ($this->config->getValue(GenericGatewayConfigProvider::REQUIRE_SHOPPING_CART)) {
+        $this->config->setMethodCode($methodCode);
+
+        $refundData = $this->buildRefundData($buildSubject, $storeId);
+        $refundData['method_code'] = $methodCode;
+
+        return $refundData;
+    }
+
+    /**
+     * Build either the shopping cart refund or normal refund data depending on the selected setting
+     *
+     * @param array $buildSubject
+     * @param int $storeId
+     * @return array
+     * @throws CouldNotRefundException
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
+     */
+    private function buildRefundData(array $buildSubject, int $storeId): array
+    {
+        if ($this->config->getValue(GenericGatewayConfigProvider::REQUIRE_SHOPPING_CART, $storeId)) {
             return $this->shoppingCartRefundRequestBuilder->build($buildSubject);
         }
+
         return $this->refundTransactionBuilder->build($buildSubject);
     }
 }

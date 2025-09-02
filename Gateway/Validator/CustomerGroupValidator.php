@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,9 +7,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
@@ -18,8 +15,10 @@ declare(strict_types=1);
 namespace MultiSafepay\ConnectCore\Gateway\Validator;
 
 use Magento\Customer\Model\Session;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Payment\Gateway\Config\Config;
-use Magento\Quote\Api\Data\CartInterface;
+use Magento\Quote\Model\Quote;
 
 class CustomerGroupValidator
 {
@@ -39,11 +38,16 @@ class CustomerGroupValidator
     }
 
     /**
-     * @param CartInterface $quote
-     * @param $config
+     * @param Quote $quote
+     * @param Config $config
+     * @param string $methodCode
      * @return bool
+     *
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    public function validate(CartInterface $quote, Config $config): bool
+    public function validate(Quote $quote, Config $config, string $methodCode): bool
     {
         $storeId = $quote->getStoreId();
 
@@ -55,7 +59,7 @@ class CustomerGroupValidator
 
             return !in_array(
                 ($this->customerSession->isLoggedIn() && $this->customerSession->getCustomer()->getId())
-                    ? $this->customerSession->getCustomer()->getGroupId() : $quote->getCustomerGroupId(),
+                    ? (int)$this->customerSession->getCustomer()->getGroupId() : (int)$quote->getCustomerGroupId(),
                 $availableCustomerGroups
             );
         }

@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,9 +7,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
@@ -21,12 +18,13 @@ use Magento\Framework\App\Area;
 use Magento\Framework\App\State;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Model\Order;
-use MultiSafepay\ConnectCore\Model\Ui\Gateway\BankTransferConfigProvider;
-use MultiSafepay\ConnectCore\Test\Integration\AbstractTestCase;
 use MultiSafepay\ConnectCore\Gateway\Request\Builder\RedirectTransactionBuilder;
+use MultiSafepay\ConnectCore\Model\Ui\Gateway\BankTransferConfigProvider;
+use MultiSafepay\ConnectCore\Test\Integration\Gateway\AbstractGatewayTestCase;
 
-class RedirectTransactionBuilderTest extends AbstractTestCase
+class RedirectTransactionBuilderTest extends AbstractGatewayTestCase
 {
     /**
      * @magentoDataFixture Magento/Sales/_files/order.php
@@ -46,13 +44,15 @@ class RedirectTransactionBuilderTest extends AbstractTestCase
         bool $isNotified,
         string $areaCode
     ): void {
+        $order = $this->getOrder();
+
         if ($paymentMethod) {
-            $this->getOrder()->getPayment()->setMethod($paymentMethod);
+            $order->getPayment()->setMethod($paymentMethod);
         }
 
         $this->getAreaStateObject()->setAreaCode($areaCode);
 
-        $modifiedStateObject = $this->prepareRedirectTransactionBuilder();
+        $modifiedStateObject = $this->prepareRedirectTransactionBuilder($order);
 
         self::assertEquals($status, $modifiedStateObject->getStatus());
         self::assertEquals($state, $modifiedStateObject->getState());
@@ -60,13 +60,14 @@ class RedirectTransactionBuilderTest extends AbstractTestCase
     }
 
     /**
+     * @param OrderInterface $order
      * @return DataObject
      * @throws LocalizedException
      */
-    private function prepareRedirectTransactionBuilder(): DataObject
+    private function prepareRedirectTransactionBuilder(OrderInterface $order): DataObject
     {
         $buildSubject = [
-            'payment' => $this->getPaymentDataObject(),
+            'payment' => $this->getPaymentDataObject('direct', $order),
             'stateObject' => new DataObject(),
         ];
         $this->getRedirectTransactionBuilder()->build($buildSubject);

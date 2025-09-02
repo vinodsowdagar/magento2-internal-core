@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,19 +7,18 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
 
 namespace MultiSafepay\ConnectCore\Plugin\Sales\Model;
 
-use Magento\Sales\Api\Data\OrderInterface;
+use Exception;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Model\Order;
-use MultiSafepay\ConnectCore\Service\OrderService;
-use MultiSafepay\ConnectCore\Service\Order\CancelMultisafepayOrderPretransaction;
+use MultiSafepay\ConnectCore\Config\Config;
+use MultiSafepay\ConnectCore\Service\Order\CancelMultisafepayOrderPaymentLink;
 use MultiSafepay\ConnectCore\Util\PaymentMethodUtil;
 
 class OrderPlugin
@@ -31,43 +29,51 @@ class OrderPlugin
     private $paymentMethodUtil;
 
     /**
-     * @var OrderService
+     * @var CancelMultisafepayOrderPaymentLink
      */
-    private $orderService;
+    private $cancelMultisafepayOrderPaymentLink;
 
     /**
-     * @var CancelMultisafepayOrderPretransaction
+     * @var Config
      */
-    private $cancelMultisafepayOrderPretransaction;
+    private $config;
 
     /**
      * OrderPlugin constructor.
      *
      * @param PaymentMethodUtil $paymentMethodUtil
-     * @param OrderService $orderService
-     * @param CancelMultisafepayOrderPretransaction $cancelMultisafepayOrderPretransaction
+     * @param CancelMultisafepayOrderPaymentLink $cancelMultisafepayOrderPaymentLink
+     * @param Config $config
      */
     public function __construct(
         PaymentMethodUtil $paymentMethodUtil,
-        OrderService $orderService,
-        CancelMultisafepayOrderPretransaction $cancelMultisafepayOrderPretransaction
+        CancelMultisafepayOrderPaymentLink $cancelMultisafepayOrderPaymentLink,
+        Config $config
     ) {
         $this->paymentMethodUtil = $paymentMethodUtil;
-        $this->orderService = $orderService;
-        $this->cancelMultisafepayOrderPretransaction = $cancelMultisafepayOrderPretransaction;
+        $this->cancelMultisafepayOrderPaymentLink = $cancelMultisafepayOrderPaymentLink;
+        $this->config = $config;
     }
 
     /**
-     * @param OrderInterface $subject
-     * @return OrderInterface[]
+     * @param Order $subject
+     * @return array
+     * @throws LocalizedException
+     * @throws Exception
      */
-    public function beforeCancel(OrderInterface $subject): array
+    public function beforeCancel(Order $subject): array
     {
+        if ($this->config->getCancelPaymentLinkOption($subject->getStoreId())
+            !== CancelMultisafepayOrderPaymentLink::CANCEL_ALWAYS_PRETRANSACTION_OPTION
+        ) {
+            return [$subject];
+        }
+
         if ($subject->canCancel()
             && $this->paymentMethodUtil->isMultisafepayOrder($subject)
             && $subject->getState() === Order::STATE_PENDING_PAYMENT
         ) {
-            $this->cancelMultisafepayOrderPretransaction->execute($subject);
+            $this->cancelMultisafepayOrderPaymentLink->execute($subject);
         }
 
         return [$subject];

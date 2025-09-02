@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,9 +7,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
@@ -31,16 +28,18 @@ class CurrencyValidatorTest extends AbstractTestCase
     private $currencyValidator;
 
     /**
+     * @var PaymentGatewayConfig
+     */
+    private $paymentConfig;
+
+    /**
      * {@inheritdoc}
      */
     protected function setUp(): void
     {
-        $paymentConfig = $this->getObjectManager()->create(PaymentGatewayConfig::class);
-        $paymentConfig->setMethodCode(VisaConfigProvider::CODE);
-        $this->currencyValidator = $this->getObjectManager()->create(
-            CurrencyValidator::class,
-            ['config' => $paymentConfig]
-        );
+        $this->currencyValidator = $this->getObjectManager()->create(CurrencyValidator::class);
+        $this->paymentConfig = $this->getObjectManager()->create(PaymentGatewayConfig::class);
+        $this->paymentConfig->setMethodCode(VisaConfigProvider::CODE);
     }
 
     /**
@@ -51,7 +50,13 @@ class CurrencyValidatorTest extends AbstractTestCase
      */
     public function testValidateWithAllowSpecificCurrencyDisabled(): void
     {
-        self::assertTrue($this->currencyValidator->validate($this->getValidationSubjectFromQuote())->isValid());
+        self::assertFalse(
+            $this->currencyValidator->validate(
+                $this->getQuote('tableRate'),
+                $this->paymentConfig,
+                VisaConfigProvider::CODE
+            )
+        );
     }
 
     /**
@@ -62,13 +67,13 @@ class CurrencyValidatorTest extends AbstractTestCase
      */
     public function testValidateWithAllowSpecificCurrencyEnabled(): void
     {
-        $validationSubject = $this->getValidationSubjectFromQuote();
-
-        self::assertFalse($this->currencyValidator->validate($validationSubject)->isValid());
-
-        $validationSubject['currency'] = '';
-
-        self::assertFalse($this->currencyValidator->validate($validationSubject)->isValid());
+        self::assertTrue(
+            $this->currencyValidator->validate(
+                $this->getQuote('tableRate'),
+                $this->paymentConfig,
+                VisaConfigProvider::CODE
+            )
+        );
     }
 
     /**
@@ -79,20 +84,12 @@ class CurrencyValidatorTest extends AbstractTestCase
      */
     public function testValidatePassedWithAllowSpecificCurrencyEnabled(): void
     {
-        self::assertTrue($this->currencyValidator->validate($this->getValidationSubjectFromQuote())->isValid());
-    }
-
-    /**
-     * @return array
-     * @throws Exception
-     */
-    private function getValidationSubjectFromQuote(): array
-    {
-        $quote = $this->getQuote('tableRate');
-
-        return [
-            'storeId' => $quote->getStoreId(),
-            'currency' => $quote->getStore()->getBaseCurrencyCode(),
-        ];
+        self::assertFalse(
+            $this->currencyValidator->validate(
+                $this->getQuote('tableRate'),
+                $this->paymentConfig,
+                VisaConfigProvider::CODE
+            )
+        );
     }
 }

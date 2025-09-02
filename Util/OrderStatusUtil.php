@@ -27,10 +27,10 @@ class OrderStatusUtil
     }
 
     /**
-     * @param OrderInterface $order
+     * @param Order $order
      * @return string
      */
-    public function getPendingStatus(OrderInterface $order): string
+    public function getPendingStatus(Order $order): string
     {
         if ($status = $this->config->getPendingStatus($order->getStoreId())) {
             return $status;
@@ -40,10 +40,10 @@ class OrderStatusUtil
     }
 
     /**
-     * @param OrderInterface $order
+     * @param Order $order
      * @return string
      */
-    public function getPendingPaymentStatus(OrderInterface $order): string
+    public function getPendingPaymentStatus(Order $order): string
     {
         if ($status = $this->config->getPendingPaymentStatus($order->getStoreId())) {
             return $status;
@@ -53,15 +53,25 @@ class OrderStatusUtil
     }
 
     /**
-     * @param OrderInterface $order
+     * @param Order $order
      * @return string
      */
-    public function getProcessingStatus(OrderInterface $order): string
+    public function getProcessingStatus(Order $order): string
     {
         if ($orderStatus = $this->config->getProcessingStatus($order->getStoreId())) {
             return $orderStatus;
         }
 
         return $order->getConfig()->getStateDefaultStatus(Order::STATE_PROCESSING) ?? Order::STATE_PROCESSING;
+    }
+
+    /**
+     * @param OrderInterface $order
+     * @param string $transactionStatus
+     * @return string
+     */
+    public function getOrderStatusByTransactionStatus(OrderInterface $order, string $transactionStatus): string
+    {
+        return $this->config->getStatusByTransactionStatus($transactionStatus, $order->getStoreId());
     }
 }

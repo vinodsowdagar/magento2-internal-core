@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,27 +7,23 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
 
 namespace MultiSafepay\ConnectCore\Model\Api\Builder;
 
-use Exception;
 use Magento\Framework\Event\ManagerInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Payment\Gateway\Config\Config;
-use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\Data\OrderPaymentInterface;
+use Magento\Sales\Model\Order;
 use MultiSafepay\Api\Transactions\OrderRequest;
 use MultiSafepay\ConnectCore\Util\CurrencyUtil;
 use MultiSafepay\ConnectCore\Util\PriceUtil;
 use MultiSafepay\ValueObject\Money;
-use MultiSafepay\ConnectAdminhtml\Model\Config\Source\PaymentAction;
 
 class OrderRequestBuilder
 {
@@ -89,13 +84,12 @@ class OrderRequestBuilder
     }
 
     /**
-     * @param OrderInterface $order
+     * @param Order $order
      * @return OrderRequest
      * @throws LocalizedException
      * @throws NoSuchEntityException
-     * @throws Exception
      */
-    public function build(OrderInterface $order): OrderRequest
+    public function build(Order $order): OrderRequest
     {
         $payment = $order->getPayment();
         $orderId = (string) $order->getRealOrderId();

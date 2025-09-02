@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,9 +7,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
@@ -28,19 +25,27 @@ use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Payment\Gateway\Data\PaymentDataObjectFactoryInterface;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
+use Magento\Payment\Gateway\Http\Transfer;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Api\Data\CartInterface;
 use Magento\Quote\Model\Quote;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\Data\OrderInterfaceFactory;
+use Magento\Sales\Api\Data\ShipmentInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order\Payment;
+use Magento\Sales\Model\Order\Shipment;
+use Magento\Sales\Model\Order\ShipmentFactory;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Tax\Api\TaxCalculationInterface;
 use Magento\Tax\Model\Config;
 use Magento\Tax\Model\Sales\Total\Quote\SetupUtil;
 use Magento\TestFramework\Helper\Bootstrap;
+use MultiSafepay\ConnectCore\Client\Client;
+use MultiSafepay\ConnectCore\Config\Config as MultiSafepayConfig;
+use MultiSafepay\ConnectCore\Factory\SdkFactory;
 use MultiSafepay\ConnectCore\Model\Ui\Gateway\VisaConfigProvider;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
 use ReflectionObject;
@@ -76,11 +81,6 @@ abstract class AbstractTestCase extends TestCase
      */
     protected function getOrder(): OrderInterface
     {
-        static $order = null;
-        if ($order instanceof OrderInterface) {
-            return $order;
-        }
-
         /** @var OrderRepositoryInterface $orderRepository */
         $orderRepository = $this->getObjectManager()->get(OrderRepositoryInterface::class);
 
@@ -104,12 +104,17 @@ abstract class AbstractTestCase extends TestCase
 
     /**
      * @param string $type
+     * @param OrderInterface|null $order
      * @return PaymentDataObjectInterface
      * @throws LocalizedException
      */
-    protected function getPaymentDataObject(string $type = 'direct'): PaymentDataObjectInterface
-    {
-        $order = $this->getOrder();
+    protected function getPaymentDataObject(
+        string $type = 'direct',
+        ?OrderInterface $order = null
+    ): PaymentDataObjectInterface {
+        if (!$order) {
+            $order = $this->getOrder();
+        }
 
         /** @var PaymentDataObjectFactoryInterface $paymentDataObjectFactory */
         $paymentDataObjectFactory = $this->getObjectManager()->get(PaymentDataObjectFactoryInterface::class);
@@ -159,14 +164,17 @@ abstract class AbstractTestCase extends TestCase
 
     /**
      * @param string $fixtureFile
+     * @param bool $returnContent
+     * @return mixed|null
      * @throws Exception
      */
-    protected function includeFixtureFile(string $fixtureFile)
+    protected function includeFixtureFile(string $fixtureFile, bool $returnContent = false)
     {
         /** @var ComponentRegistrar $componentRegistrar */
         $componentRegistrar = $this->getObjectManager()->get(ComponentRegistrar::class);
         $modulePath = $componentRegistrar->getPath('module', 'MultiSafepay_ConnectCore');
         $fixturePath = $modulePath . '/Test/Integration/_files/' . $fixtureFile . '.php';
+
         if (!is_file($fixturePath)) {
             throw new Exception('Fixture file "' . $fixturePath . '" could not be found');
         }
@@ -175,8 +183,14 @@ abstract class AbstractTestCase extends TestCase
         $directoryList = $this->getObjectManager()->get(DirectoryList::class);
         $rootPath = $directoryList->getRoot();
         chdir($rootPath . '/dev/tests/integration/testsuite/');
-        require($fixturePath);
+        $fileContent = require($fixturePath);
         chdir($cwd);
+
+        if ($returnContent) {
+            return $fileContent;
+        }
+
+        return null;
     }
 
     /**
@@ -288,5 +302,77 @@ abstract class AbstractTestCase extends TestCase
         $order->save();
 
         return $order;
+    }
+
+    /**
+     * @return array|null
+     * @throws Exception
+     */
+    protected function getManualCaptureTransactionData(): ?array
+    {
+        return $this->includeFixtureFile('manual_capture_transaction_data_example', true);
+    }
+
+    /**
+     * @return array|null
+     * @throws Exception
+     */
+    protected function getTransactionData(): array
+    {
+        return $this->includeFixtureFile('transaction_data', true);
+    }
+
+    /**
+     * @param MockObject $sdkReturnMock
+     * @return MockObject
+     */
+    protected function setupSdkFactory(MockObject $sdkReturnMock): MockObject
+    {
+        $sdkFactory = $this->getMockBuilder(SdkFactory::class)
+            ->setConstructorArgs([
+                $this->getObjectManager()->get(MultiSafepayConfig::class),
+                $this->getObjectManager()->get(Client::class)
+            ])->getMock();
+
+        $sdkFactory->expects(self::any())
+            ->method('create')
+            ->willReturn($sdkReturnMock);
+
+        return $sdkFactory;
+    }
+
+    /**
+     * @param OrderInterface $order
+     * @param array $items
+     * @return ShipmentInterface
+     * @throws LocalizedException
+     */
+    protected function createShipmentForOrder(OrderInterface $order, array $items): ShipmentInterface
+    {
+        $shipment = $this->getObjectManager()->get(ShipmentFactory::class)->create($order, $items);
+        $shipment->setPackages([['1'], ['2']]);
+        $shipment->setShipmentStatus(Shipment::STATUS_NEW);
+        $shipment->register();
+        $order->setShipment($shipment);
+        $shipment->save();
+
+        return $shipment;
+    }
+
+    /**
+     * @param $body
+     * @return MockObject
+     */
+    protected function prepareTransferObjectMock($body): MockObject
+    {
+        $transferObject = $this->getMockBuilder(Transfer::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $transferObject
+            ->method('getBody')
+            ->willReturn($body);
+
+        return $transferObject;
     }
 }

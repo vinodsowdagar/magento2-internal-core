@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,18 +7,17 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
 
 namespace MultiSafepay\ConnectCore\Factory;
 
-use Http\Adapter\Guzzle6\Client;
-use Http\Factory\Guzzle\RequestFactory;
-use Http\Factory\Guzzle\StreamFactory;
+use Exception;
+use MultiSafepay\ConnectCore\Client\Client;
+use MultiSafepay\Exception\InvalidApiKeyException;
+use Nyholm\Psr7\Factory\Psr17Factory;
 use MultiSafepay\ConnectCore\Config\Config;
 use MultiSafepay\Sdk;
 
@@ -28,46 +26,39 @@ class SdkFactory
     /**
      * @var Config
      */
-    private $config;
+    protected $config;
 
     /**
      * @var Client
      */
-    private $psrClient;
+    protected $client;
 
     /**
-     * @var StreamFactory
+     * @var Psr17Factory
      */
-    private $streamFactory;
-
-    /**
-     * @var RequestFactory
-     */
-    private $requestFactory;
+    protected $psr17Factory;
 
     /**
      * Client constructor.
      *
-     * @param Client $psrClient
-     * @param RequestFactory $requestFactory
-     * @param StreamFactory $streamFactory
      * @param Config $config
+     * @param Client $client
      */
     public function __construct(
-        Client $psrClient,
-        RequestFactory $requestFactory,
-        StreamFactory $streamFactory,
-        Config $config
+        Config $config,
+        Client $client
     ) {
-        $this->psrClient = $psrClient;
-        $this->requestFactory = $requestFactory;
-        $this->streamFactory = $streamFactory;
         $this->config = $config;
+        $this->client = $client;
+        $this->psr17Factory = new Psr17Factory();
     }
 
     /**
+     * Create the Sdk object
+     *
      * @param int|null $storeId
      * @return Sdk
+     * @throws Exception
      */
     public function create(?int $storeId = null): Sdk
     {
@@ -75,17 +66,39 @@ class SdkFactory
     }
 
     /**
+     * Create the Sdk based on mode and api key
+     *
+     * @param bool $isLive
+     * @param string $apiKey
+     * @return Sdk
+     * @throws InvalidApiKeyException
+     */
+    public function createWithModeAndApiKey(bool $isLive, string $apiKey): Sdk
+    {
+        return new Sdk(
+            $apiKey,
+            $isLive,
+            $this->client,
+            $this->psr17Factory,
+            $this->psr17Factory
+        );
+    }
+
+    /**
+     * Get an instance of the Sdk
+     *
      * @param int|null $storeId
      * @return Sdk
+     * @throws Exception
      */
-    private function get(int $storeId = null): Sdk
+    private function get(?int $storeId = null): Sdk
     {
         return new Sdk(
             $this->config->getApiKey($storeId),
             $this->config->isLiveMode($storeId),
-            $this->psrClient,
-            $this->requestFactory,
-            $this->streamFactory
+            $this->client,
+            $this->psr17Factory,
+            $this->psr17Factory
         );
     }
 }

@@ -1,6 +1,6 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
-    <event name="payment_method_assign_data_multisafepay_ideal">
-        <observer name="ideal_assign_chosen_issuer" instance="MultiSafepay\ConnectCore\Observer\Gateway\IdealDataAssignObserver" />
+    <event name="payment_method_assign_data_multisafepay_mybank">
+        <observer name="mybank_assign_chosen_issuer" instance="MultiSafepay\ConnectCore\Observer\Gateway\IssuersDataAssignObserver" />
     </event>
     <event name="payment_method_assign_data_multisafepay_payafter">
         <observer name="payafter_assign_payment_data" instance="MultiSafepay\ConnectCore\Observer\Gateway\PayafterDataAssignObserver" />
@@ -20,6 +20,12 @@
     <event name="payment_method_assign_data_multisafepay_in3">
         <observer name="in3_assign_payment_data" instance="MultiSafepay\ConnectCore\Observer\Gateway\In3DataAssignObserver" />
     </event>
+    <event name="payment_method_assign_data_multisafepay_in3b2b">
+        <observer name="multisafepay_in3b2b_assign_payment_data" instance="MultiSafepay\ConnectCore\Observer\Gateway\PaymentComponentDataAssignObserver" />
+    </event>
+    <event name="payment_method_assign_data_multisafepay_billink">
+        <observer name="multisafepay_billink_assign_payment_data" instance="MultiSafepay\ConnectCore\Observer\Gateway\PaymentComponentDataAssignObserver" />
+    </event>
     <event name="payment_method_assign_data_multisafepay_visa">
         <observer name="visa_assign_credit_card_data" instance="MultiSafepay\ConnectCore\Observer\Gateway\CreditCardDataAssignObserver" />
     </event>
@@ -35,19 +41,34 @@
     <event name="payment_method_assign_data_multisafepay_amex">
         <observer name="multisafepay_amex_assign_credit_card_data" instance="MultiSafepay\ConnectCore\Observer\Gateway\CreditCardDataAssignObserver" />
     </event>
-
+    <event name="payment_method_assign_data_multisafepay_applepay">
+        <observer name="multisafepay_applepay_assign_credit_card_data" instance="MultiSafepay\ConnectCore\Observer\Gateway\WalletDataAssignObserver" />
+    </event>
+    <event name="payment_method_assign_data_multisafepay_googlepay">
+        <observer name="multisafepay_googlepay_assign_credit_card_data" instance="MultiSafepay\ConnectCore\Observer\Gateway\WalletDataAssignObserver" />
+    </event>
+    <event name="payment_method_assign_data_multisafepay_bnplmf">
+        <observer name="multisafepay_bnplmf_assign_payment_data" instance="MultiSafepay\ConnectCore\Observer\Gateway\PaymentComponentDataAssignObserver" />
+    </event>
+    <event name="payment_method_assign_data_multisafepay_bnplinstm">
+        <observer name="multisafepay_bnplinstm_assign_payment_data" instance="MultiSafepay\ConnectCore\Observer\Gateway\PaymentComponentDataAssignObserver" />
+    </event>
+    <event name="payment_method_assign_data_multisafepay_zinia">
+        <observer name="multisafepay_zinia_assign_payment_data" instance="MultiSafepay\ConnectCore\Observer\Gateway\PaymentComponentDataAssignObserver" />
+    </event>
     <event name="email_order_set_template_vars_before">
         <observer name="payment_link_email_var" instance="MultiSafepay\ConnectCore\Observer\SetTemplateVarsBefore" />
     </event>
-
     <event name="email_order_comment_set_template_vars_before">
         <observer name="payment_link_email_comment_var" instance="MultiSafepay\ConnectCore\Observer\SetTemplateVarsBefore" />
     </event>
-
     <event name="sales_order_shipment_save_after">
         <observer name="multisafepay_shipment_save_after" instance="MultiSafepay\ConnectCore\Observer\ShipmentSaveAfterObserver" />
     </event>
     <event name="sales_order_invoice_save_after">
         <observer name="inventory_sales_virtual_source_deduction_processor" instance="MultiSafepay\ConnectCore\Observer\InvoiceSaveAfterObserver"/>
+    </event>
+    <event name="sales_order_place_after">
+        <observer name="multisafepay_order_place_after" instance="MultiSafepay\ConnectCore\Observer\OrderPlaceAfterObserver" />
     </event>
 </config>

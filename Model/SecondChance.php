@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,16 +7,14 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
 
 namespace MultiSafepay\ConnectCore\Model;
 
-use Magento\Sales\Api\Data\OrderInterface;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Api\OrderItemRepositoryInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\StatusResolver;
@@ -58,9 +55,10 @@ class SecondChance
     }
 
     /**
-     * @param OrderInterface $order
+     * @param Order $order
+     * @throws LocalizedException
      */
-    public function reopenOrder(OrderInterface $order): void
+    public function reopenOrder(Order $order): void
     {
         $order->setBaseDiscountCanceled(0)
             ->setBaseShippingCanceled(0)

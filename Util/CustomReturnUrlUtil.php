@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,9 +7,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
@@ -23,6 +20,7 @@ use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\UrlInterface;
 use Magento\Quote\Model\QuoteIdToMaskedQuoteIdInterface;
 use Magento\Sales\Api\Data\OrderInterface;
+use Magento\Sales\Model\Order;
 use Magento\Store\Api\StoreRepositoryInterface;
 use MultiSafepay\ConnectCore\Config\Config;
 use MultiSafepay\ConnectCore\Logger\Logger;
@@ -56,6 +54,11 @@ class CustomReturnUrlUtil
     private $quoteIdToMaskedQuoteId;
 
     /**
+     * @var SecureToken
+     */
+    private $secureToken;
+
+    /**
      * CustomReturnUrlUtil constructor.
      *
      * @param Config $config
@@ -84,6 +87,7 @@ class CustomReturnUrlUtil
      * @param array $transactionParameters
      * @param string $customUrlType
      * @return string|null
+     * @throws \Exception
      */
     public function getCustomReturnUrlByType(
         OrderInterface $order,
@@ -125,12 +129,12 @@ class CustomReturnUrlUtil
 
     /**
      * @param string $urlString
-     * @param OrderInterface $order
+     * @param Order $order
      * @param array $transactionParameters
      * @return string
      * @throws NoSuchEntityException
      */
-    private function buildCustomUrl(string $urlString, OrderInterface $order, array $transactionParameters): string
+    private function buildCustomUrl(string $urlString, Order $order, array $transactionParameters): string
     {
         $storeId = $order->getStoreId();
         $orderStore = $this->storeRepository->getById($storeId);

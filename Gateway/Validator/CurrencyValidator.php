@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,58 +7,43 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
 
 namespace MultiSafepay\ConnectCore\Gateway\Validator;
 
-use Magento\Payment\Gateway\ConfigInterface;
-use Magento\Payment\Gateway\Validator\AbstractValidator;
-use Magento\Payment\Gateway\Validator\ResultInterface;
-use Magento\Payment\Gateway\Validator\ResultInterfaceFactory;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Payment\Gateway\Config\Config;
+use Magento\Quote\Model\Quote;
 
-class CurrencyValidator extends AbstractValidator
+class CurrencyValidator
 {
     /**
-     * @var ConfigInterface
-     */
-    private $config;
-
-    /**
-     * CurrencyValidator constructor.
+     * @param Quote $quote
+     * @param Config $config
+     * @param string $methodCode
+     * @return bool
      *
-     * @param ResultInterfaceFactory $resultFactory
-     * @param ConfigInterface $config
+     * @throws NoSuchEntityException
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    public function __construct(
-        ResultInterfaceFactory $resultFactory,
-        ConfigInterface $config
-    ) {
-        $this->config = $config;
-        parent::__construct($resultFactory);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function validate(array $validationSubject): ResultInterface
+    public function validate(Quote $quote, Config $config, string $methodCode): bool
     {
-        $storeId = $validationSubject['storeId'];
+        $storeId = $quote->getStoreId();
 
-        if ((int)$this->config->getValue('allow_specific_currency', $storeId) === 1) {
+        if ((int)$config->getValue('allow_specific_currency', $storeId) === 1) {
             $availableCurrencies = explode(
                 ',',
-                (string)$this->config->getValue('allowed_currency', $storeId)
+                (string)$config->getValue('allowed_currency', $storeId)
             );
 
-            if (!in_array($validationSubject['currency'], $availableCurrencies, true)) {
-                return $this->createResult(false);
+            if (!in_array($quote->getStore()->getCurrentCurrencyCode(), $availableCurrencies, true)) {
+                return true;
             }
         }
-        return $this->createResult(true);
+
+        return false;
     }
 }

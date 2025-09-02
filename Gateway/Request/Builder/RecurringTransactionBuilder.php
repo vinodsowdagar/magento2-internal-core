@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,9 +7,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
@@ -20,9 +17,10 @@ namespace MultiSafepay\ConnectCore\Gateway\Request\Builder;
 use Exception;
 use Magento\Payment\Gateway\Helper\SubjectReader;
 use Magento\Payment\Gateway\Request\BuilderInterface;
-use Magento\Sales\Api\Data\OrderPaymentInterface;
-use Magento\Sales\Model\Order;
+use Magento\Sales\Model\Order\Payment;
+use MultiSafepay\ConnectCore\Logger\Logger;
 use MultiSafepay\ConnectCore\Service\EmailSender;
+use Magento\Framework\Exception\LocalizedException;
 
 class RecurringTransactionBuilder implements BuilderInterface
 {
@@ -32,14 +30,22 @@ class RecurringTransactionBuilder implements BuilderInterface
     private $emailSender;
 
     /**
-     * RedirectTransactionBuilder constructor.
+     * @var Logger
+     */
+    private $logger;
+
+    /**
+     * RecurringTransactionBuilder constructor.
      *
      * @param EmailSender $emailSender
+     * @param Logger $logger
      */
     public function __construct(
-        EmailSender $emailSender
+        EmailSender $emailSender,
+        Logger $logger
     ) {
         $this->emailSender = $emailSender;
+        $this->logger = $logger;
     }
 
     /**
@@ -51,18 +57,22 @@ class RecurringTransactionBuilder implements BuilderInterface
     {
         $paymentDataObject = SubjectReader::readPayment($buildSubject);
 
-        /** @var OrderPaymentInterface $payment */
+        /** @var Payment $payment */
         $payment = $paymentDataObject->getPayment();
-
-        /** @var Order $order */
         $order = $payment->getOrder();
 
-        if (!$this->emailSender->checkOrderConfirmationBeforeTransaction()) {
-            $order->setCanSendNewEmailFlag(false);
+        try {
+            if (!$this->emailSender->checkOrderConfirmationBeforeTransaction(
+                $payment->getMethod() !== '' ? $payment->getMethod() : $payment->getMethodInstance()->getCode()
+            )) {
+                $order->setCanSendNewEmailFlag(false);
+            }
+        } catch (LocalizedException $localizedException) {
+            $this->logger->logExceptionForOrder($order->getIncrementId(), $localizedException);
         }
 
         return [
-            'order' => $order
+            'order' => $order,
         ];
     }
 }

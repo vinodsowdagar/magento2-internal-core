@@ -5,19 +5,18 @@ declare(strict_types=1);
 namespace MultiSafepay\ConnectCore\Model\Ui\Gateway;
 
 use Magento\Checkout\Model\Session;
-use Magento\Framework\App\Filesystem\DirectoryList;
+use Magento\Framework\App\Config\Storage\WriterInterface;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Filesystem;
 use Magento\Framework\Locale\ResolverInterface;
-use Magento\Framework\UrlInterface;
 use Magento\Framework\View\Asset\Repository as AssetRepository;
 use Magento\Payment\Gateway\Config\Config as PaymentConfig;
-use Magento\Store\Model\StoreManagerInterface;
 use MultiSafepay\ConnectCore\Config\Config;
 use MultiSafepay\ConnectCore\Factory\SdkFactory;
 use MultiSafepay\ConnectCore\Logger\Logger;
 use MultiSafepay\ConnectCore\Model\Ui\GenericConfigProvider;
+use MultiSafepay\ConnectCore\Util\CheckoutFieldsUtil;
+use MultiSafepay\ConnectCore\Util\GenericGatewayUtil;
+use MultiSafepay\ConnectCore\Util\JsonHandler;
 
 /**
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
@@ -27,26 +26,11 @@ class GenericGatewayConfigProvider extends GenericConfigProvider
 {
     public const CODE = 'multisafepay_genericgateway';
     public const REQUIRE_SHOPPING_CART = 'require_shopping_cart';
-    public const GENERIC_CONFIG_IMAGE_PATH = '%s/gateway_image';
-    public const GENERIC_CONFIG_PATHS = [
-        'multisafepay_gateways',
-        'multisafepay_giftcards'
-    ];
 
     /**
-     * The tail part of directory path for uploading the logo
+     * @var GenericGatewayUtil
      */
-    public const UPLOAD_DIR = 'multisafepay/genericgateway';
-
-    /**
-     * @var StoreManagerInterface
-     */
-    private $storeManager;
-
-    /**
-     * @var Filesystem
-     */
-    private $filesystem;
+    private $genericGatewayUtil;
 
     /**
      * GenericGatewayConfigProvider constructor.
@@ -57,9 +41,12 @@ class GenericGatewayConfigProvider extends GenericConfigProvider
      * @param Session $checkoutSession
      * @param Logger $logger
      * @param ResolverInterface $localeResolver
-     * @param Filesystem $filesystem
-     * @param StoreManagerInterface $storeManager
      * @param PaymentConfig $paymentConfig
+     * @param WriterInterface $configWriter
+     * @param JsonHandler $jsonHandler
+     * @param CheckoutFieldsUtil $checkoutFieldsUtil
+     * @param GenericGatewayUtil $genericGatewayUtil
+     * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
     public function __construct(
         AssetRepository $assetRepository,
@@ -69,11 +56,12 @@ class GenericGatewayConfigProvider extends GenericConfigProvider
         Logger $logger,
         ResolverInterface $localeResolver,
         PaymentConfig $paymentConfig,
-        Filesystem $filesystem,
-        StoreManagerInterface $storeManager
+        WriterInterface $configWriter,
+        JsonHandler $jsonHandler,
+        CheckoutFieldsUtil $checkoutFieldsUtil,
+        GenericGatewayUtil $genericGatewayUtil
     ) {
-        $this->storeManager = $storeManager;
-        $this->filesystem = $filesystem;
+        $this->genericGatewayUtil = $genericGatewayUtil;
         parent::__construct(
             $assetRepository,
             $config,
@@ -81,7 +69,10 @@ class GenericGatewayConfigProvider extends GenericConfigProvider
             $checkoutSession,
             $logger,
             $localeResolver,
-            $paymentConfig
+            $paymentConfig,
+            $configWriter,
+            $jsonHandler,
+            $checkoutFieldsUtil
         );
     }
 
@@ -97,8 +88,9 @@ class GenericGatewayConfigProvider extends GenericConfigProvider
 
         foreach ($this->getGenericList() as $gatewayCode) {
             $configData[$gatewayCode] = [
-                'image' => $this->getGenericFullImagePath($gatewayCode),
-                'is_preselected' => $this->isPreselectedByCode($gatewayCode)
+                'image' => $this->genericGatewayUtil->getGenericFullImagePath($gatewayCode),
+                'is_preselected' => $this->isPreselectedByCode($gatewayCode),
+                'instructions' => $this->getInstructions()
             ];
         }
 
@@ -112,36 +104,6 @@ class GenericGatewayConfigProvider extends GenericConfigProvider
     public function isPreselectedByCode(string $gatewayCode): bool
     {
         return $gatewayCode === $this->config->getPreselectedMethod();
-    }
-
-    /**
-     * @param string $gatewayCode
-     * @return string
-     * @throws NoSuchEntityException
-     */
-    public function getGenericFullImagePath(string $gatewayCode): string
-    {
-        $path = $this->getImagePath($gatewayCode);
-        $imageExists = $this->filesystem->getDirectoryRead(DirectoryList::MEDIA)->isFile($path);
-
-        return $imageExists ? $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_MEDIA) . $path : '';
-    }
-
-    /**
-     * @param string $gatewayCode
-     * @return string
-     */
-    public function getImagePath(string $gatewayCode): string
-    {
-        foreach (self::GENERIC_CONFIG_PATHS as $path) {
-            $configFullPath = $path . DIRECTORY_SEPARATOR . self::GENERIC_CONFIG_IMAGE_PATH;
-
-            if ($configImagePath = $this->config->getValueByPath(sprintf($configFullPath, $gatewayCode))) {
-                return self::UPLOAD_DIR . DIRECTORY_SEPARATOR . $configImagePath;
-            }
-        }
-
-        return '';
     }
 
     /**
@@ -161,9 +123,10 @@ class GenericGatewayConfigProvider extends GenericConfigProvider
     {
         $genericList = [];
 
-        foreach (self::GENERIC_CONFIG_PATHS as $path) {
+        foreach (GenericGatewayUtil::GENERIC_CONFIG_PATHS as $path) {
             $genericList[] = (array)$this->config->getValueByPath($path, $storeId);
         }
+
         $genericList = array_merge(...$genericList);
 
         return $genericList ? array_filter(array_keys($genericList), function ($key) {

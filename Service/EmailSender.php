@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,9 +7,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
@@ -28,9 +25,11 @@ use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\Order\Invoice;
 use MultiSafepay\ConnectCore\Config\Config;
+use Magento\Payment\Gateway\Config\Config as GatewayConfig;
 use MultiSafepay\ConnectCore\Model\Ui\Gateway\AfterpayConfigProvider;
 use MultiSafepay\ConnectCore\Model\Ui\Gateway\KlarnaConfigProvider;
 use MultiSafepay\ConnectCore\Model\Ui\Gateway\PayafterConfigProvider;
+use MultiSafepay\ConnectCore\Util\LegacyUtil;
 
 /**
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
@@ -66,6 +65,11 @@ class EmailSender
     private $scopeConfig;
 
     /**
+     * @var GatewayConfig
+     */
+    private $gatewayConfig;
+
+    /**
      * Email constructor.
      *
      * @param Config $config
@@ -73,22 +77,27 @@ class EmailSender
      * @param OrderIdentity $orderIdentity
      * @param OrderSender $orderSender
      * @param ScopeConfigInterface $scopeConfig
+     * @param gatewayConfig $gatewayConfig
      */
     public function __construct(
         Config $config,
         InvoiceSender $invoiceSender,
         OrderIdentity $orderIdentity,
         OrderSender $orderSender,
-        ScopeConfigInterface $scopeConfig
+        ScopeConfigInterface $scopeConfig,
+        GatewayConfig $gatewayConfig
     ) {
         $this->config = $config;
         $this->invoiceSender = $invoiceSender;
         $this->orderIdentity = $orderIdentity;
         $this->orderSender = $orderSender;
         $this->scopeConfig = $scopeConfig;
+        $this->gatewayConfig = $gatewayConfig;
     }
 
     /**
+     * Send the order confirmation email
+     *
      * @param OrderInterface $order
      * @param string $emailType
      * @return bool
@@ -98,10 +107,21 @@ class EmailSender
         OrderInterface $order,
         string $emailType = self::AFTER_TRANSACTION_EMAIL_TYPE
     ): bool {
-        if (!$order->getEmailSent()
-            && $this->orderIdentity->isEnabled()
-            && $this->config->getOrderConfirmationEmail() === $emailType
-        ) {
+        if ($order->getEmailSent() || !$this->orderIdentity->isEnabled()) {
+            return false;
+        }
+
+        if ($order->getPayment()) {
+            $this->gatewayConfig->setMethodCode($order->getPayment()->getMethod());
+        }
+
+        $emailTypeConfig = $this->config->getOrderConfirmationEmail();
+
+        if ($this->gatewayConfig->getValue(Config::OVERRIDE_ORDER_CONFIRMATION_EMAIL)) {
+            $emailTypeConfig = $this->gatewayConfig->getValue(Config::ORDER_CONFIRMATION_EMAIL) ?? '';
+        }
+
+        if ($emailType === $emailTypeConfig) {
             $this->orderSender->send($order);
 
             return true;
@@ -123,13 +143,16 @@ class EmailSender
             throw new MailException(__('Sending invoice emails disabled'));
         }
 
-        $allowedMethods = [
+        $disallowedMethods = [
             PayafterConfigProvider::CODE,
             KlarnaConfigProvider::CODE,
-            AfterpayConfigProvider::CODE
+            AfterpayConfigProvider::CODE,
+            LegacyUtil::LEGACY_AFTERPAY_CODE,
+            LegacyUtil::LEGACY_KLARNA_CODE,
+            LegacyUtil::LEGACY_PAYAFTER_CODE,
         ];
 
-        if (!$invoice->getEmailSent() && !in_array($payment->getMethod(), $allowedMethods, true)) {
+        if (!$invoice->getEmailSent() && !in_array($payment->getMethod(), $disallowedMethods, true)) {
             $this->invoiceSender->send($invoice);
 
             return true;
@@ -139,10 +162,23 @@ class EmailSender
     }
 
     /**
+     * Check if order confirmation e-mail needs to be sent before transaction
+     *
+     * @param string $methodCode
      * @return bool
      */
-    public function checkOrderConfirmationBeforeTransaction(): bool
+    public function checkOrderConfirmationBeforeTransaction(string $methodCode): bool
     {
+        $this->gatewayConfig->setMethodCode($methodCode);
+
+        if (!$this->gatewayConfig->getValue(Config::OVERRIDE_ORDER_CONFIRMATION_EMAIL)) {
+            return $this->config->getOrderConfirmationEmail() === Config::BEFORE_TRANSACTION;
+        }
+
+        if ($gatewaySpecificSetting = $this->gatewayConfig->getValue(Config::ORDER_CONFIRMATION_EMAIL)) {
+            return $gatewaySpecificSetting === Config::BEFORE_TRANSACTION;
+        }
+
         return $this->config->getOrderConfirmationEmail() === Config::BEFORE_TRANSACTION;
     }
 }

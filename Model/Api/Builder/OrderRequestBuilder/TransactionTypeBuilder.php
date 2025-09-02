@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,19 +7,20 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
 
 namespace MultiSafepay\ConnectCore\Model\Api\Builder\OrderRequestBuilder;
 
-use Magento\Payment\Gateway\Config\Config;
-use Magento\Sales\Api\Data\OrderInterface;
-use Magento\Sales\Api\Data\OrderPaymentInterface;
+use Magento\Payment\Gateway\Config\Config as GatewayConfig;
+use Magento\Sales\Model\Order;
+use Magento\Sales\Model\Order\Payment;
 use MultiSafepay\Api\Transactions\OrderRequest;
+use MultiSafepay\ConnectCore\Config\Config;
+use MultiSafepay\ConnectCore\Model\Ui\Gateway\IdealConfigProvider;
+use MultiSafepay\Exception\InvalidArgumentException;
 
 class TransactionTypeBuilder implements OrderRequestBuilderInterface
 {
@@ -28,35 +28,49 @@ class TransactionTypeBuilder implements OrderRequestBuilderInterface
     public const TRANSACTION_TYPE_REDIRECT_VALUE = 'redirect';
 
     /**
-     * @var Config
+     * @var GatewayConfig
      */
-    private $config;
+    private $gatewayConfig;
 
     /**
      * TransactionTypeBuilder constructor.
      *
-     * @param Config $config
+     * @param GatewayConfig $gatewayConfig
      */
-    public function __construct(Config $config)
+    public function __construct(GatewayConfig $gatewayConfig)
     {
-        $this->config = $config;
+        $this->gatewayConfig = $gatewayConfig;
     }
 
     /**
-     * @param OrderInterface $order
-     * @param OrderPaymentInterface $payment
+     * Retrieve the transaction type with a fallback to redirect
+     *
+     * @param Order $order
+     * @param Payment $payment
      * @param OrderRequest $orderRequest
+     * @throws InvalidArgumentException
      * @return void
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    public function build(
-        OrderInterface $order,
-        OrderPaymentInterface $payment,
-        OrderRequest $orderRequest
-    ): void {
-        $transactionType = (string)$this->config->getValue('transaction_type');
-        if (!$transactionType) {
-            $transactionType = $payment->getAdditionalInformation()['transaction_type']
-                               ?? self::TRANSACTION_TYPE_REDIRECT_VALUE;
+    public function build(Order $order, Payment $payment, OrderRequest $orderRequest): void
+    {
+        $this->gatewayConfig->setMethodCode($payment->getMethod());
+
+        $transactionType = $payment->getAdditionalInformation()['transaction_type'] ??
+            $this->gatewayConfig->getValue('transaction_type') ??
+            self::TRANSACTION_TYPE_REDIRECT_VALUE;
+
+        if ($transactionType === 'payment_component') {
+            $orderRequest->addType(self::TRANSACTION_TYPE_DIRECT_VALUE);
+            return;
+        }
+
+        if ($payment->getMethod() === IdealConfigProvider::CODE
+            && $this->gatewayConfig->getValue(Config::SHOW_PAYMENT_PAGE)
+        ) {
+            $orderRequest->addType(self::TRANSACTION_TYPE_REDIRECT_VALUE);
+            return;
         }
 
         $orderRequest->addType($transactionType);

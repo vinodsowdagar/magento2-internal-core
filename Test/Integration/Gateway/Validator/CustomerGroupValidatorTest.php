@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,9 +7,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
@@ -65,7 +62,8 @@ class CustomerGroupValidatorTest extends AbstractTestCase
         self::assertFalse(
             $this->customerGroupValidator->validate(
                 $this->getQuote('tableRate'),
-                $this->paymentConfig
+                $this->paymentConfig,
+                VisaConfigProvider::CODE
             )
         );
     }
@@ -86,7 +84,8 @@ class CustomerGroupValidatorTest extends AbstractTestCase
         self::assertTrue(
             $this->customerGroupValidator->validate(
                 $quote,
-                $this->paymentConfig
+                $this->paymentConfig,
+                VisaConfigProvider::CODE
             )
         );
     }
@@ -108,7 +107,8 @@ class CustomerGroupValidatorTest extends AbstractTestCase
         self::assertFalse(
             $this->customerGroupValidator->validate(
                 $quote,
-                $this->paymentConfig
+                $this->paymentConfig,
+                VisaConfigProvider::CODE
             )
         );
     }

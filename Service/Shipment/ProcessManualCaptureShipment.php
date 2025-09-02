@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,9 +7,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
@@ -18,19 +15,21 @@ declare(strict_types=1);
 namespace MultiSafepay\ConnectCore\Service\Shipment;
 
 use Exception;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\MailException;
 use Magento\Framework\Message\ManagerInterface;
-use Magento\Sales\Api\Data\InvoiceInterface;
-use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\Data\OrderPaymentInterface;
 use Magento\Sales\Api\Data\ShipmentInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
+use Magento\Sales\Exception\CouldNotInvoiceException;
+use Magento\Sales\Model\Order;
+use Magento\Sales\Model\Order\Invoice;
+use Magento\Sales\Model\Order\Payment;
 use MultiSafepay\ConnectCore\Logger\Logger;
 use MultiSafepay\ConnectCore\Service\EmailSender;
 use MultiSafepay\ConnectCore\Service\Invoice\CreateInvoiceAfterShipment;
 use MultiSafepay\ConnectCore\Util\InvoiceUtil;
 use MultiSafepay\ConnectCore\Util\ShipmentUtil;
-use Psr\Http\Client\ClientExceptionInterface;
 
 /**
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
@@ -111,15 +110,13 @@ class ProcessManualCaptureShipment
 
     /**
      * @param ShipmentInterface $shipment
-     * @param OrderInterface $order
-     * @param OrderPaymentInterface $payment
-     * @throws ClientExceptionInterface
+     * @param Order $order
+     * @param Payment $payment
+     * @throws CouldNotInvoiceException
+     * @throws Exception
      */
-    public function execute(
-        ShipmentInterface $shipment,
-        OrderInterface $order,
-        OrderPaymentInterface $payment
-    ): void {
+    public function execute(ShipmentInterface $shipment, Order $order, Payment $payment): void
+    {
         $orderIncrementId = $order->getIncrementId();
 
         try {
@@ -130,22 +127,11 @@ class ProcessManualCaptureShipment
                     $this->sendInvoiceEmail($payment, $lastCreatedInvoice);
                     $successMessage = __(
                         'The manual capture invoice %1 was created at MultiSafepay',
-                        $lastCreatedInvoice->getIncrementId()
+                        $orderIncrementId . '_' . $lastCreatedInvoice->getIncrementId()
                     );
                     $this->logger->logInfoForOrder($orderIncrementId, $successMessage->render());
                     $this->messageManager->addSuccessMessage($successMessage);
                 }
-            }
-
-            if ($this->shipmentUtil->isOrderShippedPartially($order)) {
-                /**
-                 * @todo update parent Transaction status to status completed for fully paid transaction
-                 */
-                //if (!$order->getBaseTotalDue()) {
-                //    //$this->completeParentTransactionStatus($order, $transactionManager);
-                //}
-
-                return;
             }
         } catch (Exception $exception) {
             $this->logger->logExceptionForOrder($orderIncrementId, $exception);
@@ -153,7 +139,7 @@ class ProcessManualCaptureShipment
                 __('The manual capture invoice could not be created at MultiSafepay, please check the logs.')
             );
 
-            return;
+            throw new CouldNotInvoiceException(__($exception->getMessage()));
         }
 
         $this->addShippingToTransaction->execute($shipment, $order);
@@ -161,10 +147,11 @@ class ProcessManualCaptureShipment
 
     /**
      * @param OrderPaymentInterface $payment
-     * @param InvoiceInterface $invoice
+     * @param Invoice $invoice
+     * @throws LocalizedException
      * @throws Exception
      */
-    public function sendInvoiceEmail(OrderPaymentInterface $payment, InvoiceInterface $invoice): void
+    public function sendInvoiceEmail(OrderPaymentInterface $payment, Invoice $invoice): void
     {
         $orderIncrementId = $invoice->getOrder()->getIncrementId();
 
@@ -179,32 +166,4 @@ class ProcessManualCaptureShipment
             $this->logger->logExceptionForOrder($orderIncrementId, $mailException, Logger::INFO);
         }
     }
-
-    //private function completeParentTransactionStatus(
-    //    OrderInterface $order,
-    //    TransactionManager $transactionManager
-    //): void {
-    //    //$orderId = $order->getIncrementId();
-    //    //$errorMessage = __('The order status could not be updated at MultiSafepay.');
-    //    //
-    //    //try {
-    //    //    $transactionManager->update(
-    //    //        $orderId,
-    //    //        $this->updateRequest->addData(["financial_status" => TransactionStatus::COMPLETED])
-    //    //    )->getResponseData();
-    //    //} catch (ApiException $apiException) {
-    //    //    $this->logger->logUpdateRequestApiException($orderId, $apiException);
-    //    //    $this->messageManager->addErrorMessage($errorMessage);
-    //    //
-    //    //    return;
-    //    //} catch (ClientExceptionInterface $clientException) {
-    //    //    $this->logger->logClientException($orderId, $clientException);
-    //    //    $this->messageManager->addErrorMessage($errorMessage);
-    //    //
-    //    //    return;
-    //    //}
-    //    //
-    //    //$msg = __('The parent order status has succesfully been updated at MultiSafepay');
-    //    //$this->messageManager->addSuccessMessage($msg);
-    //}
 }

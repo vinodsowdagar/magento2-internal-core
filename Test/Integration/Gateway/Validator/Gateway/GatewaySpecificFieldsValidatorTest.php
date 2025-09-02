@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,9 +7,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
@@ -87,7 +84,7 @@ class GatewaySpecificFieldsValidatorTest extends AbstractTestCase
         $result = $this->baseGatewayValidator->validate([]);
 
         self::assertFalse($result->isValid());
-        self::assertEquals('Can\'t get a payment information', $result->getFailsDescription()[0]->render());
+        self::assertEquals('Can\'t get the payment information', $result->getFailsDescription()[0]->render());
     }
 
     /**
@@ -103,6 +100,7 @@ class GatewaySpecificFieldsValidatorTest extends AbstractTestCase
                     'date_of_birth' => '1990-10-10',
                     'gender' => 'mr',
                     'phone_number' => '12314566',
+                    'afterpay_terms' => '1',
                     'transaction_type' => TransactionTypeBuilder::TRANSACTION_TYPE_DIRECT_VALUE
                 ],
                 'expected' => [

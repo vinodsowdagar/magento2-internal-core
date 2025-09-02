@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the Open Software License (OSL 3.0)
@@ -8,9 +7,7 @@
  * It is also available through the world-wide-web at this URL:
  * http://opensource.org/licenses/osl-3.0.php
  *
- * Copyright © 2021 MultiSafepay, Inc. All rights reserved.
  * See DISCLAIMER.md for disclaimer details.
- *
  */
 
 declare(strict_types=1);
@@ -22,6 +19,7 @@ use Magento\Sales\Api\Data\OrderInterface;
 use MultiSafepay\Api\Transactions\OrderRequest\Arguments\ShoppingCart\Item;
 use MultiSafepay\ConnectCore\Util\PriceUtil;
 use MultiSafepay\ConnectCore\Util\TaxUtil;
+use MultiSafepay\Exception\InvalidArgumentException;
 use MultiSafepay\ValueObject\Money;
 
 class ShippingItemBuilder implements ShoppingCartBuilderInterface
@@ -57,6 +55,7 @@ class ShippingItemBuilder implements ShoppingCartBuilderInterface
      * @param string $currency
      * @return Item[]
      * @throws NoSuchEntityException
+     * @throws InvalidArgumentException
      */
     public function build(OrderInterface $order, string $currency): array
     {
@@ -66,14 +65,45 @@ class ShippingItemBuilder implements ShoppingCartBuilderInterface
             $shippingPrice = $this->priceUtil->getShippingUnitPrice($order);
 
             $items[] = (new Item())
-                ->addName($order->getShippingDescription() ?? 'shipment')
+                ->addName($this->getShippingItemName($order))
                 ->addUnitPrice(new Money($shippingPrice * 100, $currency))
                 ->addQuantity(1)
                 ->addDescription('Shipping')
                 ->addMerchantItemId(self::SHIPPING_ITEM_MERCHANT_ITEM_ID)
-                ->addTaxRate($this->taxUtil->getShippingTaxRate($order));
+                ->addTaxRate($this->getTaxRate($order));
         }
 
         return $items;
+    }
+
+    /**
+     * Get the shipping tax rate
+     *
+     * @throws NoSuchEntityException
+     */
+    public function getTaxRate(OrderInterface $order): float
+    {
+        if ($order->getShippingTaxAmount() > 0) {
+            return $this->taxUtil->getShippingTaxRate($order);
+        }
+
+        return 0.0;
+    }
+
+    /**
+     * Get the shipping item name
+     *
+     * @param OrderInterface $order
+     * @return string
+     */
+    private function getShippingItemName(OrderInterface $order): string
+    {
+        $shippingDescription = $order->getShippingDescription() ?? 'shipment';
+
+        if ($order->getShippingDiscountAmount() > 0.0) {
+            return $shippingDescription . __(' (Discount applied)');
+        }
+
+        return $shippingDescription;
     }
 }
